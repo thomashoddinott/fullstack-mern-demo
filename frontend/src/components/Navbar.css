@@ -1,0 +1,41 @@
+@reference "../index.css";
+
+.navbar {
+  @apply w-full bg-white border-b px-6 py-3 flex flex-wrap items-center justify-between;
+}
+
+.navbar-left {
+  @apply flex items-center gap-3;
+}
+
+.navbar-logo {
+  @apply w-10 h-10 rounded;
+}
+
+.navbar-title {
+  @apply text-xl font-semibold text-gray-800 whitespace-nowrap;
+}
+
+.navbar-center {
+  @apply flex items-center gap-6 flex-wrap justify-center flex-1;
+}
+
+.navbar-link {
+  @apply text-sm font-medium text-gray-600 hover:text-blue-600;
+}
+
+.navbar-link-active {
+  @apply text-blue-600;
+}
+
+.navbar-right {
+  @apply flex items-center gap-3 ml-auto;
+}
+
+.navbar-avatar {
+  @apply w-10 h-10 rounded-full object-cover;
+}
+
+.navbar-username {
+  @apply text-sm font-medium text-gray-700 whitespace-nowrap;
+}

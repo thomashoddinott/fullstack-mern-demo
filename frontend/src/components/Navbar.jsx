@@ -1,36 +1,42 @@
+import { NavLink } from "react-router-dom";
+import "./Navbar.css";
+
 export default function Navbar() {
   return (
-    <nav className="w-full bg-white border-b px-6 py-3 flex flex-wrap justify-between items-center">
+    <nav className="navbar">
       {/* Left: Logo + Academy name */}
-      <div className="flex items-center gap-3">
+      <div className="navbar-left">
         <img
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKrfmniVCTDVQibp1OvqzPpovIAPmIDFJ63w&s"
           alt="Logo"
-          className="w-10 h-10 rounded"
+          className="navbar-logo"
         />
-        <h1 className="text-xl font-semibold text-gray-800 whitespace-nowrap">
-          BJJ Academy
-        </h1>
+        <h1 className="navbar-title">BJJ Academy</h1>
       </div>
 
       {/* Center: Navigation links */}
-      <div className="flex items-center gap-6 flex-wrap justify-center">
-        <button className="text-sm font-medium text-blue-600">Dashboard</button>
-        <button className="text-sm font-medium text-gray-600 hover:text-blue-600">Classes</button>
-        <button className="text-sm font-medium text-gray-600 hover:text-blue-600">Subscription</button>
-        <button className="text-sm font-medium text-gray-600 hover:text-blue-600">Schedule</button>
+      <div className="navbar-center">
+        {["Dashboard", "Classes", "Subscriptions", "Schedule"].map((label) => (
+          <NavLink
+            key={label}
+            to={`/${label === "Dashboard" ? "" : label.toLowerCase()}`}
+            className={({ isActive }) =>
+              `navbar-link ${isActive ? "navbar-link-active" : ""}`
+            }
+          >
+            {label}
+          </NavLink>
+        ))}
       </div>
 
       {/* Right: User info */}
-      <div className="flex items-center gap-3">
+      <div className="navbar-right">
         <img
           src="https://hips.hearstapps.com/hmg-prod/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=0.752xw:1.00xh;0.175xw,0&resize=1200:*"
           alt="User avatar"
-          className="w-10 h-10 rounded-full object-cover"
+          className="navbar-avatar"
         />
-        <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-          John Doe
-        </span>
+        <span className="navbar-username">John Doe</span>
       </div>
     </nav>
   );
