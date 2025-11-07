@@ -1,0 +1,29 @@
+@reference "../index.css";
+
+.book-classes {
+  @apply space-y-6;
+}
+
+.book-classes-header {
+  @apply flex flex-wrap items-center justify-between gap-4;
+}
+
+.book-classes-title {
+  @apply text-2xl font-semibold text-gray-800;
+}
+
+.book-classes-controls {
+  @apply flex items-center gap-4;
+}
+
+.book-classes-select {
+  @apply border rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.book-classes-button {
+  @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition;
+}
+
+.book-classes-grid {
+  @apply flex flex-wrap gap-6 justify-center;
+}

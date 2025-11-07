@@ -1,0 +1,41 @@
+@reference "../index.css";
+
+.class-card {
+  @apply bg-white rounded-xl shadow-sm overflow-hidden w-58 hover:-translate-y-1 transition-transform cursor-pointer;
+}
+
+.class-card-header {
+  @apply text-white p-4 flex flex-col items-center;
+}
+
+.class-card-logo {
+  @apply w-16 h-16 my-3;
+}
+
+.class-card-body {
+  @apply p-4;
+}
+
+.class-card-title {
+  @apply text-lg font-semibold text-gray-800;
+}
+
+.class-card-teacher {
+  @apply text-sm text-gray-600 mb-3;
+}
+
+.class-card-info {
+  @apply text-sm text-gray-700 space-y-1;
+}
+
+.class-card-info-row {
+  @apply flex items-center gap-2;
+}
+
+.class-card-footer {
+  @apply p-4 pt-0;
+}
+
+.class-card-button {
+  @apply w-full py-2 text-white font-medium rounded-md hover:opacity-90 transition;
+}
