@@ -1,0 +1,77 @@
+@reference "../index.css"; /* adjust path if needed */
+
+/* Container */
+.user-card {
+  @apply bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col items-center text-center;
+}
+
+/* Avatar + text */
+.user-avatar {
+  @apply w-20 h-20 rounded-full mb-4 object-cover;
+}
+
+.user-name {
+  @apply text-lg font-semibold text-gray-800;
+}
+
+.user-rank {
+  @apply text-sm text-gray-500 mb-2;
+}
+
+.user-status {
+  @apply flex items-center text-green-600 font-medium text-sm mb-4;
+}
+
+.status-dot {
+  @apply w-2 h-2 bg-green-500 rounded-full mr-2;
+}
+
+/* Subscription card */
+.subscription-card {
+  @apply w-full bg-gray-50 rounded-lg p-3 mb-4;
+}
+
+.subscription-header {
+  @apply flex justify-between items-center mb-1;
+}
+
+.subscription-header p {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.subscription-badge {
+  @apply text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full;
+}
+
+.subscription-expiry {
+  @apply text-xs text-gray-500 mb-2;
+}
+
+.progress-bar {
+  @apply w-full h-2 bg-gray-200 rounded-full;
+}
+
+.progress-fill {
+  @apply h-2 bg-red-500 rounded-full w-3/4;
+}
+
+/* Quick stats */
+.quick-stats {
+  @apply w-full bg-gray-50 rounded-lg p-3 text-left;
+}
+
+.quick-stats-title {
+  @apply text-sm font-semibold text-gray-800 mb-2;
+}
+
+.quick-stats-list {
+  @apply text-sm text-gray-600;
+}
+
+.stat-row {
+  @apply flex justify-between mb-1;
+}
+
+.stat-row span:last-child {
+  @apply font-medium text-gray-800;
+}
