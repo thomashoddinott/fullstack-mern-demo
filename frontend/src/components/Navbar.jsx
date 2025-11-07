@@ -32,7 +32,7 @@ export default function Navbar() {
       {/* Right: User info */}
       <div className="navbar-right">
         <img
-          src="https://hips.hearstapps.com/hmg-prod/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=0.752xw:1.00xh;0.175xw,0&resize=1200:*"
+          src="https://randomuser.me/api/portraits/men/32.jpg"
           alt="User avatar"
           className="navbar-avatar"
         />
