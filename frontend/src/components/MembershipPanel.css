@@ -1,0 +1,41 @@
+@reference "../index.css";
+
+.membership-panel {
+  @apply bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center shadow-sm;
+}
+
+.membership-left {
+  @apply text-left;
+}
+
+.membership-title {
+  @apply text-xl font-semibold mb-1;
+}
+
+.membership-subtitle {
+  @apply text-sm opacity-90 mb-4;
+}
+
+.membership-stats {
+  @apply flex items-center gap-10 text-center;
+}
+
+.membership-value {
+  @apply text-2xl font-semibold;
+}
+
+.membership-label {
+  @apply text-xs opacity-90 mt-1;
+}
+
+.membership-right {
+  @apply mt-4 md:mt-0 flex flex-col items-end;
+}
+
+.membership-button {
+  @apply bg-white text-red-600 font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition;
+}
+
+.membership-autorenew {
+  @apply text-xs opacity-90 mt-1;
+}
