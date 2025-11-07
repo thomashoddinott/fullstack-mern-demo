@@ -5,3 +5,5 @@ export default function ClassesPage() {
     </div>
   );
 }
+
+// static info about classes, not schedule (where you can book)
