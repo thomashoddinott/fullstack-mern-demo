@@ -16,10 +16,11 @@ export default function Navbar() {
 
       {/* Center: Navigation links */}
       <div className="navbar-center">
-        {["Dashboard", "Classes", "Subscriptions", "Schedule"].map((label) => (
+        {/* todo: update links, refactor link, probably don't use map  */}
+        {["Home", "Classes", "Subscriptions", "Schedule"].map((label) => (
           <NavLink
             key={label}
-            to={`/${label === "Dashboard" ? "" : label.toLowerCase()}`}
+            to={`/${label === "Home" ? "" : label.toLowerCase()}`}
             className={({ isActive }) =>
               `navbar-link ${isActive ? "navbar-link-active" : ""}`
             }

@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./Layout";
-import DashboardPage from "./pages/DashboardPage";
+import HomePage from "./pages/HomePage";
 import ClassesPage from "./pages/ClassesPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import SchedulePage from "./pages/SchedulePage";
@@ -12,7 +12,7 @@ const routes = [
     children: [
       {
         path: "/",
-        element: <DashboardPage />,
+        element: <HomePage />,
       },
       {
         path: "/classes",
