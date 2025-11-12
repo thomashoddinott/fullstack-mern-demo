@@ -4,11 +4,12 @@ import HomePage from "./pages/HomePage";
 import ClassesPage from "./pages/ClassesPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import SchedulePage from "./pages/SchedulePage";
+import AboutPage from "./pages/AboutPage";
 
 const routes = [
   {
     path: "/",
-    element: <Layout/>,
+    element: <Layout />,
     children: [
       {
         path: "/",
@@ -25,6 +26,10 @@ const routes = [
       {
         path: "/schedule",
         element: <SchedulePage />,
+      },
+      {
+        path: "/about",
+        element: <AboutPage />,
       },
     ],
   },

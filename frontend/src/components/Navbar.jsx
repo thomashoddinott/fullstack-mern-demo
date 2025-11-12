@@ -5,14 +5,14 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       {/* Left: Logo + Academy name */}
-      <div className="navbar-left">
+      <NavLink to="/about" className="navbar-left">
         <img
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKrfmniVCTDVQibp1OvqzPpovIAPmIDFJ63w&s"
           alt="Logo"
           className="navbar-logo"
         />
         <h1 className="navbar-title">BJJ Academy</h1>
-      </div>
+      </NavLink>
 
       {/* Center: Navigation links */}
       <div className="navbar-center">
