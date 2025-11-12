@@ -5,6 +5,7 @@ import ClassesPage from "./pages/ClassesPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import SchedulePage from "./pages/SchedulePage";
 import AboutPage from "./pages/AboutPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const routes = [
   {
@@ -30,6 +31,10 @@ const routes = [
       {
         path: "/about",
         element: <AboutPage />,
+      },
+      {
+        path: "/profile",
+        element: <ProfilePage />,
       },
     ],
   },
