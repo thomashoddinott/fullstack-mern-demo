@@ -5,8 +5,9 @@ export default function Layout() {
   return (
     <>
       <Navbar />
-      <Outlet /> 
-      {/* ^ whichever page is being displayed */}
+      <div className="pt-20">
+        <Outlet />
+      </div>
     </>
   );
 }

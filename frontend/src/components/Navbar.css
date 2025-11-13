@@ -1,7 +1,7 @@
 @reference "../index.css";
 
 .navbar {
-  @apply w-full bg-white border-b px-6 py-3 flex flex-wrap items-center justify-between;
+  @apply fixed top-0 left-0 w-full bg-white border-b px-6 py-3 flex flex-wrap items-center justify-between z-50;
 }
 
 .navbar-left {
