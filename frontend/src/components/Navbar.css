@@ -21,11 +21,11 @@
 }
 
 .navbar-link {
-  @apply text-sm font-medium text-gray-600 hover:text-blue-600;
+  @apply text-sm font-medium text-gray-600 hover:text-red-600;
 }
 
 .navbar-link-active {
-  @apply text-blue-600;
+  @apply text-red-600;
 }
 
 .navbar-right {
