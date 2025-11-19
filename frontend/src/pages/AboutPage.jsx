@@ -33,7 +33,6 @@ export default function AboutPage() {
 
   return (
     <div className="pt-20 px-6 max-w-6xl mx-auto space-y-20">
-
       {/* --- Your original About section stays unchanged --- */}
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div className="w-full">
@@ -52,23 +51,28 @@ export default function AboutPage() {
           </h3>
 
           <p className="text-lg text-gray-600 leading-relaxed">
-            You will be welcomed into a community that supports your growth
-            on and off the mats. Training improves discipline, confidence,
-            physical fitness, and resilience. Our academy blends technical
-            Brazilian Jiu-Jitsu instruction with a friendly, motivating
-            environment — whether you're starting your first class or
-            sharpening high-level skills.
+            You will be welcomed into a community that supports your growth on
+            and off the mats. Training improves discipline, confidence, physical
+            fitness, and resilience. Our academy blends technical Brazilian
+            Jiu-Jitsu instruction with a friendly, motivating environment —
+            whether you're starting your first class or sharpening high-level
+            skills.
           </p>
 
-          <button className="px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition">
-            Learn More (add link to new Contact Us page)
+          <button
+            onClick={() => alert("takes to contact page")}
+            className="px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
+          >
+            Learn More
           </button>
         </div>
       </div>
 
       {/* --- FAQ Section --- */}
       <div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">Frequently Asked Questions</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-8">
+          Frequently Asked Questions
+        </h2>
 
         <div className="space-y-4">
           {faqs.map((faq, i) => (
