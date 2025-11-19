@@ -1,7 +1,10 @@
 import { NavLink } from "react-router-dom";
+import { useState } from "react";
 import "./Navbar.css";
 
 export default function Navbar() {
+  const [showLogout, setShowLogout] = useState(false);
+
   return (
     <nav className="navbar">
       {/* Left: Logo + Academy name */}
@@ -30,14 +33,30 @@ export default function Navbar() {
         ))}
       </div>
 
-      {/* Right: User info */}
-      <div className="navbar-right">
+      {/* Right: User info and Logout Button */}
+      <div
+        className="navbar-right"
+        onMouseEnter={() => setShowLogout(true)}
+        onMouseLeave={() => setShowLogout(false)}
+      >
         <img
           src="https://randomuser.me/api/portraits/men/32.jpg"
           alt="User avatar"
           className="navbar-avatar"
         />
-        <span className="navbar-username">John Doe</span>
+
+        <div className="navbar-identity">
+          {showLogout ? (
+            <button
+              className="logout-button"
+              onClick={() => alert("user logged out")}
+            >
+              log out
+            </button>
+          ) : (
+            <span className="navbar-username">John Doe</span>
+          )}
+        </div>
       </div>
     </nav>
   );

@@ -1,9 +1,12 @@
 @reference "../index.css";
 
+/* NAVBAR WRAPPER */
 .navbar {
-  @apply fixed top-0 left-0 w-full bg-white border-b px-6 py-3 flex flex-wrap items-center justify-between z-50;
+  @apply fixed top-0 left-0 w-full bg-white border-b px-6 py-3
+         flex flex-wrap items-center justify-between z-50;
 }
 
+/* LEFT SIDE: LOGO + TITLE */
 .navbar-left {
   @apply flex items-center gap-3;
 }
@@ -16,6 +19,7 @@
   @apply text-xl font-semibold text-gray-800 whitespace-nowrap;
 }
 
+/* CENTER LINKS */
 .navbar-center {
   @apply flex items-center gap-6 flex-wrap justify-center flex-1;
 }
@@ -28,6 +32,7 @@
   @apply text-red-600;
 }
 
+/* RIGHT SIDE: USER AREA */
 .navbar-right {
   @apply flex items-center gap-3 ml-auto;
 }
@@ -36,6 +41,18 @@
   @apply w-10 h-10 rounded-full object-cover;
 }
 
+/* FIXED WIDTH CONTAINER — prevents layout shift */
+.navbar-identity {
+  @apply w-24 flex items-center justify-start;
+}
+
 .navbar-username {
   @apply text-sm font-medium text-gray-700 whitespace-nowrap;
+}
+
+/* LOGOUT BUTTON */
+.logout-button {
+  @apply text-sm bg-red-500 text-white px-3 py-1 rounded-md 
+         hover:bg-red-600 transition
+         focus:outline-none focus:ring-2 focus:ring-red-500/50;
 }
