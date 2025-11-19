@@ -31,14 +31,14 @@ export default function Navbar() {
       </div>
 
       {/* Right: User info */}
-      <NavLink to="/profile" className="navbar-right">
+      <div className="navbar-right">
         <img
           src="https://randomuser.me/api/portraits/men/32.jpg"
           alt="User avatar"
           className="navbar-avatar"
         />
         <span className="navbar-username">John Doe</span>
-      </NavLink>
+      </div>
     </nav>
   );
 }

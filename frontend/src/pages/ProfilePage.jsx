@@ -5,3 +5,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+// Ask AI to ideate
