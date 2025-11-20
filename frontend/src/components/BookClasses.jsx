@@ -1,6 +1,18 @@
 import "./BookClasses.css";
 import { useNavigate } from "react-router-dom";
 import ClassCard from "./ClassCard";
+import { classes } from "../data/classes";
+
+const formatClassTime = (start, end) => {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const dateOptions = { month: "2-digit", day: "2-digit" };
+  const timeOptions = { hour: "numeric", minute: "numeric", hour12: true };
+  const formattedDate = startDate.toLocaleDateString("en-US", dateOptions);
+  const formattedStartTime = startDate.toLocaleTimeString("en-US", timeOptions);
+  const formattedEndTime = endDate.toLocaleTimeString("en-US", timeOptions);
+  return `${formattedDate} | ${formattedStartTime} - ${formattedEndTime}`;
+};
 
 export default function BookClasses() {
   const navigate = useNavigate();
@@ -27,30 +39,15 @@ export default function BookClasses() {
       </div>
 
       <div className="book-classes-grid">
-        <ClassCard
-          title="BJJ - GI"
-          teacher="Matteo"
-          datetime="07/11 | 6:00 PM - 7:30 PM"
-          spots="8/15 spots"
-        />
-        <ClassCard
-          title="BJJ - NOGI"
-          teacher="Matteo"
-          datetime="07/11 | 6:00 PM - 7:30 PM"
-          spots="8/15 spots"
-        />
-        <ClassCard
-          title="Yoga Flow"
-          teacher="Matteo"
-          datetime="07/11 | 6:00 PM - 7:30 PM"
-          spots="8/15 spots"
-        />
-        <ClassCard
-          title="Strength & Conditioning"
-          teacher="Matteo"
-          datetime="07/11 | 6:00 PM - 7:30 PM"
-          spots="8/15 spots"
-        />
+        {classes.slice(0, 4).map((classItem) => (
+          <ClassCard
+            key={classItem.id}
+            title={classItem.title}
+            teacher={classItem.teacher}
+            datetime={formatClassTime(classItem.start, classItem.end)}
+            spots={`${classItem.spots_available}/${classItem.spots_total} spots`}
+          />
+        ))}
       </div>
     </div>
   );

@@ -1,11 +1,11 @@
 import "./ClassCard.css";
 
 const classStyles = {
-  "BJJ - GI": {
+  "BJJ - Gi": {
     color: "bg-red-600",
     logo: "https://static.thenounproject.com/png/631848-200.png",
   },
-  "BJJ - NOGI": {
+  "BJJ - No-Gi": {
     color: "bg-gray-500",
     logo: "https://static.thenounproject.com/png/1995411-200.png",
   },
