@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: bjj-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./docker/init.js:/docker-entrypoint-initdb.d/init.js:ro
+
+volumes:
+  mongo-data:
