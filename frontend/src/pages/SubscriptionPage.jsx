@@ -1,6 +1,32 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import "./SubscriptionPage.css";
 
 export default function SubscriptionPage() {
+  const [plans, setPlans] = useState(null);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [plansError, setPlansError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    axios
+      .get('/api/plans')
+      .then((res) => {
+        if (mounted) setPlans(res.data);
+      })
+      .catch((err) => {
+        console.error('Error fetching plans:', err);
+        if (mounted) setPlansError(err);
+      })
+      .finally(() => {
+        if (mounted) setPlansLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const currentMembership = {
     title: "1 Month",
     subtitle: "Unlimited access to all classes and facilities",
@@ -9,12 +35,6 @@ export default function SubscriptionPage() {
     billing: "Monthly",
     autoRenew: "March 15, 2024",
   };
-
-  const plans = [
-    { id: "1m", label: "1 Month", price: "$99", details: "Monthly plan" },
-    { id: "3m", label: "3 Months", price: "$150", details: "Quarterly plan" },
-    { id: "12m", label: "12 Months", price: "$500", details: "Yearly plan" },
-  ];
 
   return (
     <div className="subscription-wrapper">
@@ -55,7 +75,9 @@ export default function SubscriptionPage() {
         <h2 className="plans-title">Available Plans</h2>
 
         <div className="plans-grid">
-          {plans.map((plan) => (
+          {plansLoading && <div>Loading plans...</div>}
+          {plansError && <div>Error loading plans</div>}
+          {plans && plans.map((plan) => (
             <div key={plan.id} className="plan-card">
               <h3 className="plan-title">{plan.label}</h3>
               <p className="plan-details">{plan.details}</p>
