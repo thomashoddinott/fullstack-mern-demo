@@ -50,3 +50,9 @@ db.users.insertMany([
     }
   }
 ]);
+
+db.plans.insertMany([
+  { id: "1m", label: "1 Month", price: "$99", details: "Monthly plan" },
+  { id: "3m", label: "3 Months", price: "$150", details: "Quarterly plan" },
+  { id: "12m", label: "12 Months", price: "$500", details: "Yearly plan" }
+]);
