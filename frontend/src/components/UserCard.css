@@ -26,6 +26,15 @@
   @apply w-2 h-2 bg-green-500 rounded-full mr-2;
 }
 
+/* Inactive status styles */
+.user-status--inactive {
+  @apply text-red-600;
+}
+
+.status-dot--inactive {
+  @apply bg-red-500;
+}
+
 /* Subscription card */
 .subscription-card {
   @apply w-full bg-gray-50 rounded-lg p-3 mb-4;
