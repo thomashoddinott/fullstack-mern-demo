@@ -51,6 +51,17 @@ app.get("/api/plans", async (req, res) => {
   }
 });
 
+// GET all classes
+app.get("/api/classes", async (req, res) => {
+  try {
+    const classes = await db.collection("classes").find().toArray();
+    res.json(classes);
+  } catch (err) {
+    console.error("Error fetching classes:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });

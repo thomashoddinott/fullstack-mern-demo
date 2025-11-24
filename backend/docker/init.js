@@ -56,3 +56,39 @@ db.plans.insertMany([
   { id: "3m", label: "3 Months", price: "$150", details: "Quarterly plan" },
   { id: "12m", label: "12 Months", price: "$500", details: "Yearly plan" }
 ]);
+
+// Seed classes collection
+db.classes.insertMany([
+  {
+    name: "BJJ – Gi",
+    description: `Traditional Brazilian Jiu-Jitsu focused on grips, leverage, and positional control using the kimono. Expect technique drilling, positional sparring, and rolling with emphasis on detail and discipline.`,
+    teachers: [
+      "https://randomuser.me/api/portraits/men/12.jpg",
+      "https://randomuser.me/api/portraits/women/33.jpg",
+    ],
+  },
+  {
+    name: "BJJ – No-Gi",
+    description: `Submission grappling with a faster pace and no uniform grips. Ideal for developing body control, wrestling transitions, and fluid movement under pressure.`,
+    teachers: [
+      "https://randomuser.me/api/portraits/men/21.jpg",
+      "https://randomuser.me/api/portraits/men/45.jpg",
+    ],
+  },
+  {
+    name: "Yoga Flow",
+    description: `A dynamic class combining balance, strength, and flexibility. Focuses on controlled breathing, mindful transitions, and postures that improve recovery and joint mobility.`,
+    teachers: [
+      "https://randomuser.me/api/portraits/women/55.jpg",
+      "https://randomuser.me/api/portraits/women/66.jpg",
+    ],
+  },
+  {
+    name: "Strength & Conditioning",
+    description: `Functional training to enhance explosive power, stability, and endurance. Includes kettlebells, mobility drills, and core circuits tailored for combat athletes.`,
+    teachers: [
+      "https://randomuser.me/api/portraits/men/77.jpg",
+      "https://randomuser.me/api/portraits/men/88.jpg",
+    ],
+  }
+]);

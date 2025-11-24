@@ -1,44 +1,15 @@
 import { useState } from "react";
 import TeacherModal from "../components/TeacherModal";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export default function ClassesPage() {
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
-  // Classes with their teacher photos
-  const classes = [
-    {
-      name: "BJJ – Gi",
-      description: `Traditional Brazilian Jiu-Jitsu focused on grips, leverage, and positional control using the kimono. Expect technique drilling, positional sparring, and rolling with emphasis on detail and discipline.`,
-      teachers: [
-        "https://randomuser.me/api/portraits/men/12.jpg",
-        "https://randomuser.me/api/portraits/women/33.jpg",
-      ],
-    },
-    {
-      name: "BJJ – No-Gi",
-      description: `Submission grappling with a faster pace and no uniform grips. Ideal for developing body control, wrestling transitions, and fluid movement under pressure.`,
-      teachers: [
-        "https://randomuser.me/api/portraits/men/21.jpg",
-        "https://randomuser.me/api/portraits/men/45.jpg",
-      ],
-    },
-    {
-      name: "Yoga Flow",
-      description: `A dynamic class combining balance, strength, and flexibility. Focuses on controlled breathing, mindful transitions, and postures that improve recovery and joint mobility.`,
-      teachers: [
-        "https://randomuser.me/api/portraits/women/55.jpg",
-        "https://randomuser.me/api/portraits/women/66.jpg",
-      ],
-    },
-    {
-      name: "Strength & Conditioning",
-      description: `Functional training to enhance explosive power, stability, and endurance. Includes kettlebells, mobility drills, and core circuits tailored for combat athletes.`,
-      teachers: [
-        "https://randomuser.me/api/portraits/men/77.jpg",
-        "https://randomuser.me/api/portraits/men/88.jpg",
-      ],
-    },
-  ];
+  const { data: classes, isLoading, isError } = useQuery({
+    queryKey: ["classes"],
+    queryFn: () => axios.get('/api/classes').then((res) => res.data),
+  });
 
   // Dummy bios (shared across all for now)
   const dummyTeacher = {
@@ -51,7 +22,9 @@ export default function ClassesPage() {
       <h1 className="text-4xl font-bold mb-10 text-gray-800">Our Classes</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
-        {classes.map((cls, i) => (
+        {isLoading && <div>Loading classes...</div>}
+        {isError && <div>Error loading classes</div>}
+        {classes && classes.map((cls, i) => (
           <div
             key={i}
             className="bg-white rounded-xl shadow p-6 flex flex-col justify-between"
