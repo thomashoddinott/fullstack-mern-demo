@@ -1,37 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import "./UserCard.css";
 
 export default function UserCard() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: user, isLoading, isError } = useQuery({
+    queryKey: ["user", 0],
+    queryFn: () => axios.get(`/api/users/0`).then((res) => res.data),
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    axios
-      .get(`/api/users/0`)
-      .then((res) => {
-        if (mounted) setUser(res.data);
-      })
-      .catch((err) => {
-        console.error("Error fetching user:", err);
-        if (mounted) setError(err);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return <div className="user-card">Loading...</div>;
   }
 
-  if (error || !user) {
+  if (isError || !user) {
     return <div className="user-card">Error loading user</div>;
   }
   // Format subscription expiry to a friendly date (e.g. March 15, 2024)

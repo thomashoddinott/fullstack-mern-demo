@@ -1,31 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
 import "./SubscriptionPage.css";
 
 export default function SubscriptionPage() {
-  const [plans, setPlans] = useState(null);
-  const [plansLoading, setPlansLoading] = useState(true);
-  const [plansError, setPlansError] = useState(null);
-
-  useEffect(() => {
-    let mounted = true;
-    axios
-      .get('/api/plans')
-      .then((res) => {
-        if (mounted) setPlans(res.data);
-      })
-      .catch((err) => {
-        console.error('Error fetching plans:', err);
-        if (mounted) setPlansError(err);
-      })
-      .finally(() => {
-        if (mounted) setPlansLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { data: plans, isLoading: plansLoading, isError: plansError } = useQuery({
+    queryKey: ['plans'],
+    queryFn: () => axios.get('/api/plans').then((res) => res.data),
+  });
 
   const currentMembership = {
     title: "1 Month",
