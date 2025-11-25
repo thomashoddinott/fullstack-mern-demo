@@ -62,6 +62,35 @@ app.get("/api/classes", async (req, res) => {
   }
 });
 
+// GET all teachers
+app.get("/api/teachers", async (req, res) => {
+  try {
+    const teachers = await db.collection("teachers").find().toArray();
+    res.json(teachers);
+  } catch (err) {
+    console.error("Error fetching teachers:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET teacher by ID
+app.get("/api/teachers/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const teacher = await db.collection("teachers").findOne({ id });
+
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+
+    res.json(teacher);
+  } catch (err) {
+    console.error("Error fetching teacher:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });

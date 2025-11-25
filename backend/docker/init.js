@@ -62,33 +62,89 @@ db.classes.insertMany([
   {
     name: "BJJ – Gi",
     description: `Traditional Brazilian Jiu-Jitsu focused on grips, leverage, and positional control using the kimono. Expect technique drilling, positional sparring, and rolling with emphasis on detail and discipline.`,
-    teachers: [
-      "https://randomuser.me/api/portraits/men/12.jpg",
-      "https://randomuser.me/api/portraits/women/33.jpg",
-    ],
+    teacherIds: [0, 1]
   },
   {
     name: "BJJ – No-Gi",
     description: `Submission grappling with a faster pace and no uniform grips. Ideal for developing body control, wrestling transitions, and fluid movement under pressure.`,
-    teachers: [
-      "https://randomuser.me/api/portraits/men/21.jpg",
-      "https://randomuser.me/api/portraits/men/45.jpg",
-    ],
+    teacherIds: [2, 3]
   },
   {
     name: "Yoga Flow",
     description: `A dynamic class combining balance, strength, and flexibility. Focuses on controlled breathing, mindful transitions, and postures that improve recovery and joint mobility.`,
-    teachers: [
-      "https://randomuser.me/api/portraits/women/55.jpg",
-      "https://randomuser.me/api/portraits/women/66.jpg",
-    ],
+    teacherIds: [4, 5]
   },
   {
     name: "Strength & Conditioning",
     description: `Functional training to enhance explosive power, stability, and endurance. Includes kettlebells, mobility drills, and core circuits tailored for combat athletes.`,
-    teachers: [
-      "https://randomuser.me/api/portraits/men/77.jpg",
-      "https://randomuser.me/api/portraits/men/88.jpg",
-    ],
+    teacherIds: [6, 7]
+  }
+]);
+
+// Seed teachers collection
+db.teachers.insertMany([
+  {
+    id: 0,
+    firstName: "Rafael",
+    lastName: "Santos",
+    avatar: "https://randomuser.me/api/portraits/men/12.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
+  },
+  {
+    id: 1,
+    firstName: "Marcus",
+    lastName: "Johnson",
+    avatar: "https://randomuser.me/api/portraits/women/33.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
+  },
+  {
+    id: 2,
+    firstName: "Carlos",
+    lastName: "Rodriguez",
+    avatar: "https://randomuser.me/api/portraits/men/21.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
+  },
+  {
+    id: 3,
+    firstName: "Elias",
+    lastName: "Thompson",
+    avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
+  },
+  {
+    id: 4,
+    firstName: "Maria",
+    lastName: "Oliveira",
+    avatar: "https://randomuser.me/api/portraits/women/55.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
+  },
+  {
+    id: 5,
+    firstName: "Sophie",
+    lastName: "Laurent",
+    avatar: "https://randomuser.me/api/portraits/women/66.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
+  },
+  {
+    id: 6,
+    firstName: "Lena",
+    lastName: "Mueller",
+    avatar: "https://randomuser.me/api/portraits/men/77.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
+  },
+  {
+    id: 7,
+    firstName: "Yuki",
+    lastName: "Tanaka",
+    avatar: "https://randomuser.me/api/portraits/men/88.jpg",
+    bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
+    quirkyFact: "Once taught a class on a moving train for charity."
   }
 ]);
