@@ -1,7 +1,8 @@
 import "./BookClasses.css";
 import { useNavigate } from "react-router-dom";
 import ClassCard from "./ClassCard";
-import { classes } from "../data/classes";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const formatClassTime = (start, end) => {
   const startDate = new Date(start);
@@ -17,17 +18,35 @@ const formatClassTime = (start, end) => {
 export default function BookClasses() {
   const navigate = useNavigate();
 
+  // fetch the first 4 scheduled classes from the backend
+  const { data: classes = [], isLoading, isError } = useQuery({
+    queryKey: ["scheduled-classes", { limit: 4 }],
+    queryFn: () => axios.get('/api/scheduled-classes?limit=4').then((r) => r.data),
+  });
+
+  // fetch teachers to resolve teacherIds -> teacher names
+  const { data: teachers = [] } = useQuery({
+    queryKey: ["teachers"],
+    queryFn: () => axios.get('/api/teachers').then((r) => r.data),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const teacherMap = (teachers || []).reduce((acc, t) => {
+    acc[t.id] = t;
+    return acc;
+  }, {});
+
   return (
     <div className="book-classes">
       <div className="book-classes-header">
         <h2 className="book-classes-title">Book Classes</h2>
 
         <div className="book-classes-controls">
-          <select className="book-classes-select">
+          {/* <select className="book-classes-select">
             <option>This Week</option>
             <option>Next Week</option>
             <option>All Classes</option>
-          </select>
+          </select> */}
 
           <button
             onClick={() => navigate("/schedule")}
@@ -39,15 +58,45 @@ export default function BookClasses() {
       </div>
 
       <div className="book-classes-grid">
-        {classes.slice(0, 4).map((classItem) => (
-          <ClassCard
-            key={classItem.id}
-            title={classItem.title}
-            teacher={classItem.teacher}
-            datetime={formatClassTime(classItem.start, classItem.end)}
-            spots={`${classItem.spots_available}/${classItem.spots_total} spots`}
-          />
-        ))}
+        {isLoading ? (
+          <div>Loading classes...</div>
+        ) : isError ? (
+          <div>Error loading classes</div>
+        ) : (
+          classes.map((classItem) => {
+            // expected shapes:
+            // - scheduled class: { _id, id, title/name, start, end, teacher, spots_* }
+            // - class type: { _id, name, description, teacherIds }
+
+            const rawTitle = classItem.title || classItem.name || "Class";
+            const title = rawTitle.replace(/[–—]/g, " - ");
+
+            let teacher = "Staff";
+            if (Array.isArray(classItem.teacherIds) && classItem.teacherIds.length > 0) {
+              const t = teacherMap[classItem.teacherIds[0]];
+              if (t) teacher = t.name;
+            } else if (classItem.teacher) {
+              teacher = classItem.teacher;
+            }
+
+            const datetime = classItem.start ? formatClassTime(classItem.start, classItem.end) : (classItem.description || "");
+            const spots = (classItem.spots_available !== undefined && classItem.spots_total !== undefined)
+              ? `${classItem.spots_available}/${classItem.spots_total} spots`
+              : "—";
+
+            const key = classItem.id ?? classItem._id ?? title;
+
+            return (
+              <ClassCard
+                key={key}
+                title={title}
+                teacher={teacher}
+                datetime={datetime}
+                spots={spots}
+              />
+            );
+          })
+        )}
       </div>
     </div>
   );

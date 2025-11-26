@@ -94,7 +94,18 @@ app.get("/api/teachers/:id", async (req, res) => {
 // GET all scheduled classes
 app.get("/api/scheduled-classes", async (req, res) => {
   try {
-    const scheduled = await db.collection("scheduledClasses").find().toArray();
+    const limitParam = req.query.limit;
+    const coll = db.collection("scheduledClasses");
+    let cursor = coll.find();
+
+    if (limitParam !== undefined) {
+      const parsed = parseInt(limitParam, 10);
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        cursor = cursor.limit(parsed);
+      }
+    }
+
+    const scheduled = await cursor.toArray();
     res.json(scheduled);
   } catch (err) {
     console.error("Error fetching scheduled classes:", err);
