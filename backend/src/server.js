@@ -91,6 +91,17 @@ app.get("/api/teachers/:id", async (req, res) => {
   }
 });
 
+// GET all scheduled classes
+app.get("/api/scheduled-classes", async (req, res) => {
+  try {
+    const scheduled = await db.collection("scheduledClasses").find().toArray();
+    res.json(scheduled);
+  } catch (err) {
+    console.error("Error fetching scheduled classes:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });
