@@ -95,6 +95,7 @@ while (generatedClasses.length < totalClassesToGenerate && currentDate <= endDat
 }
 
 // Seed the new scheduledClasses collection with the generated data
+db.scheduledClasses.insertMany(generatedClasses);
 // --- END: Class Generation Logic ---
 
 
