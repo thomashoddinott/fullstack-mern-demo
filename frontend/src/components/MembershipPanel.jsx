@@ -1,6 +1,9 @@
 import "./MembershipPanel.css";
+import { useNavigate } from "react-router-dom";
 
 export default function MembershipPanel() {
+  const navigate = useNavigate();
+
   return (
     <div className="membership-panel">
       {/* Left: Membership info */}
@@ -26,7 +29,7 @@ export default function MembershipPanel() {
       <div className="membership-right">
         <button
           className="membership-button"
-          onClick={() => alert("Renew Subscription Clicked")}
+          onClick={() => navigate("/subscriptions")}
         >
           Renew Subscription
         </button>
