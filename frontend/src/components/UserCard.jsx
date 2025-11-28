@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import "./UserCard.css";
@@ -37,15 +37,7 @@ export default function UserCard() {
   return (
     <div className="user-card">
       {/* <img src={user.avatar} alt="User" className="user-avatar" /> */}
-      <div className="user-avatar-container">
-        <img
-          src={user.avatar}
-          alt="User"
-          className="user-avatar"
-          onClick={() => alert("Change Profile Pic")}
-        />
-        <span className="avatar-edit-icon">✍️</span>
-      </div>
+      <AvatarFilePicker initialSrc={user.avatar} />
       <h2 className="user-name">{user.name}</h2>
       <p className="user-rank">{user.rank}</p>
       <span
@@ -89,6 +81,52 @@ export default function UserCard() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AvatarFilePicker({ initialSrc }) {
+  const [src, setSrc] = useState(initialSrc);
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef(null);
+
+  const onClick = () => inputRef.current && inputRef.current.click();
+
+  const onChange = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await axios.post("/api/uploads", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const url = res.data?.url;
+      if (url) setSrc(url);
+      else alert("Upload succeeded but no URL returned");
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="user-avatar-container">
+      <img src={src} alt="User" className="user-avatar" onClick={onClick} />
+      <span className="avatar-edit-icon" onClick={onClick} role="button">
+        ✍️
+      </span>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={onChange}
+      />
+      {uploading && <div className="avatar-uploading">Uploading...</div>}
     </div>
   );
 }

@@ -1,5 +1,9 @@
 import express from "express";
 import { MongoClient } from "mongodb";
+import path from "path";
+import fs from "fs";
+import multer from "multer";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(express.json());
@@ -110,6 +114,44 @@ app.get("/api/scheduled-classes", async (req, res) => {
   } catch (err) {
     console.error("Error fetching scheduled classes:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Ensure uploads dir exists and serve it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, "..", "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use("/uploads", express.static(uploadsDir));
+
+// multer storage config
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const safe = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+    cb(null, `${Date.now()}-${safe}`);
+  },
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\//.test(file.mimetype)) cb(null, true);
+    else cb(new Error("Only image files are allowed"));
+  },
+});
+
+// POST /api/uploads - single file field named 'file'
+app.post("/api/uploads", upload.single("file"), (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    const url = `/uploads/${req.file.filename}`;
+    res.json({ url, filename: req.file.filename });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ error: "Upload failed" });
   }
 });
 
