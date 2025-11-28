@@ -4,7 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import "./UserCard.css";
 
 export default function UserCard() {
-  const { data: user, isLoading, isError } = useQuery({
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["user", 0],
     queryFn: () => axios.get(`/api/users/0`).then((res) => res.data),
   });
@@ -32,7 +36,16 @@ export default function UserCard() {
 
   return (
     <div className="user-card">
-      <img src={user.avatar} alt="User" className="user-avatar" />
+      {/* <img src={user.avatar} alt="User" className="user-avatar" /> */}
+      <div className="user-avatar-container">
+        <img
+          src={user.avatar}
+          alt="User"
+          className="user-avatar"
+          onClick={() => alert("Change Profile Pic")}
+        />
+        <span className="avatar-edit-icon">✍️</span>
+      </div>
       <h2 className="user-name">{user.name}</h2>
       <p className="user-rank">{user.rank}</p>
       <span

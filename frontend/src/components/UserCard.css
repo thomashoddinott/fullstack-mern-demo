@@ -5,11 +5,28 @@
   @apply bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col items-center text-center;
 }
 
-/* Avatar + text */
-.user-avatar {
-  @apply w-20 h-20 rounded-full mb-4 object-cover;
+/* Avatar container + hover effect */
+.user-avatar-container {
+  @apply relative inline-block mb-4;
 }
 
+.user-avatar {
+  @apply w-20 h-20 rounded-full object-cover transition-opacity duration-300;
+}
+
+.user-avatar-container:hover .user-avatar {
+  @apply opacity-80;
+}
+
+.avatar-edit-icon {
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl opacity-0 transition-opacity duration-300 pointer-events-none;
+}
+
+.user-avatar-container:hover .avatar-edit-icon {
+  @apply opacity-100;
+}
+
+/* User text */
 .user-name {
   @apply text-lg font-semibold text-gray-800;
 }
