@@ -4,23 +4,39 @@ import { useQuery } from "@tanstack/react-query";
 import "./UserCard.css";
 
 export default function UserCard() {
+  // Fetch user data
   const {
     data: user,
-    isLoading,
-    isError,
+    isLoading: isUserLoading,
+    isError: isUserError,
   } = useQuery({
     queryKey: ["user", 0],
     queryFn: () => axios.get(`/api/users/0`).then((res) => res.data),
   });
 
-  if (isLoading) {
+  // Fetch avatar separately
+  const {
+    data: avatar,
+    isLoading: isAvatarLoading,
+    isError: isAvatarError,
+  } = useQuery({
+    queryKey: ["avatar", 0],
+    queryFn: () =>
+      axios
+        .get(`/api/users/0/avatar`, { responseType: "blob" })
+        .then((res) => URL.createObjectURL(res.data)),
+    enabled: !!user, // only fetch avatar once user exists
+  });
+
+  if (isUserLoading || isAvatarLoading) {
     return <div className="user-card">Loading...</div>;
   }
 
-  if (isError || !user) {
+  if (isUserError || !user || isAvatarError) {
     return <div className="user-card">Error loading user</div>;
   }
-  // Format subscription expiry to a friendly date (e.g. March 15, 2024)
+
+  // Format subscription expiry
   const expiryRaw = user.subscription?.expiry;
   let formattedExpiry = expiryRaw ?? "N/A";
   if (expiryRaw) {
@@ -36,10 +52,9 @@ export default function UserCard() {
 
   return (
     <div className="user-card">
-      {/* <img src={user.avatar} alt="User" className="user-avatar" /> */}
       <div className="user-avatar-container">
         <img
-          src={user.avatar}
+          src={avatar}
           alt="User"
           className="user-avatar"
           onClick={() => alert("Change Profile Pic")}
