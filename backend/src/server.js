@@ -39,6 +39,33 @@ app.get("/api/users/:id", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+// GET user avatar by userId
+app.get("/api/users/:id/avatar", async (req, res) => {
+  try {
+    const userId = Number(req.params.id); // convert :id to a number
+    const userAvatar = await db.collection("user-avatars").findOne({ userId });
+
+    if (!userAvatar || !userAvatar.avatar) {
+      return res.status(404).json({ message: "User avatar not found" });
+    }
+
+    // Remove the data:image/jpeg;base64, prefix if it exists
+    const base64Data = userAvatar.avatar.replace(/^data:image\/\w+;base64,/, '');
+    
+    // Convert base64 to buffer
+    const imageBuffer = Buffer.from(base64Data, 'base64');
+    
+    // Set appropriate headers
+    res.set('Content-Type', 'image/jpeg');
+    res.set('Content-Length', imageBuffer.length);
+    
+    // Send the image
+    res.send(imageBuffer);
+  } catch (err) {
+    console.error("Error fetching user avatar:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // GET all plans
 app.get("/api/plans", async (req, res) => {
