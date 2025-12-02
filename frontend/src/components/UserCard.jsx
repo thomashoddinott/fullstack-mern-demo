@@ -1,26 +1,74 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import "./UserCard.css";
 
 export default function UserCard() {
+  // Fetch user data
   const {
     data: user,
-    isLoading,
-    isError,
+    isLoading: isUserLoading,
+    isError: isUserError,
   } = useQuery({
     queryKey: ["user", 0],
     queryFn: () => axios.get(`/api/users/0`).then((res) => res.data),
   });
 
-  if (isLoading) {
+  // Fetch avatar separately
+  const {
+    data: avatar,
+    isLoading: isAvatarLoading,
+    isError: isAvatarError,
+  } = useQuery({
+    queryKey: ["avatar", 0],
+    queryFn: () =>
+      axios
+        .get(`/api/users/0/avatar`, { responseType: "blob" })
+        .then((res) => URL.createObjectURL(res.data)),
+    enabled: !!user, // only fetch avatar once user exists
+  });
+
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadMutation = useMutation({
+    mutationFn: ({ userId, file }) => {
+      const fd = new FormData();
+      fd.append("avatar", file);
+      return axios.put(`/api/users/${userId}/avatar`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    },
+    onMutate: () => setIsUploading(true),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries(["avatar", variables.userId]);
+    },
+    onSettled: () => setIsUploading(false),
+  });
+
+  function handleAvatarClick() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const userId = user?.id ?? 0;
+    uploadMutation.mutate({ userId, file });
+    // clear the input so same file can be selected again if needed
+    e.target.value = "";
+  }
+
+  if (isUserLoading || isAvatarLoading) {
     return <div className="user-card">Loading...</div>;
   }
 
-  if (isError || !user) {
+  if (isUserError || !user || isAvatarError) {
     return <div className="user-card">Error loading user</div>;
   }
-  // Format subscription expiry to a friendly date (e.g. March 15, 2024)
+
+  // Format subscription expiry
   const expiryRaw = user.subscription?.expiry;
   let formattedExpiry = expiryRaw ?? "N/A";
   if (expiryRaw) {
@@ -36,14 +84,21 @@ export default function UserCard() {
 
   return (
     <div className="user-card">
-      {/* <img src={user.avatar} alt="User" className="user-avatar" /> */}
       <div className="user-avatar-container">
         <img
-          src={user.avatar}
+          src={avatar}
           alt="User"
           className="user-avatar"
-          onClick={() => alert("Change Profile Pic")}
+          onClick={handleAvatarClick}
         />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+        {isUploading && <div className="avatar-uploading">Uploading...</div>}
         <span className="avatar-edit-icon">✍️</span>
       </div>
       <h2 className="user-name">{user.name}</h2>
