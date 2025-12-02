@@ -1,9 +1,25 @@
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import "./Navbar.css";
 
 export default function Navbar() {
   const [showLogout, setShowLogout] = useState(false);
+  const { data: avatarUrl } = useQuery({
+    queryKey: ["avatar", 0],
+    queryFn: () =>
+      axios
+        .get(`/api/users/0/avatar`, { responseType: "blob" })
+        .then((res) => URL.createObjectURL(res.data)),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  useEffect(() => {
+    return () => {
+      if (avatarUrl) URL.revokeObjectURL(avatarUrl);
+    };
+  }, [avatarUrl]);
 
   return (
     <nav className="navbar">
@@ -39,11 +55,12 @@ export default function Navbar() {
         onMouseEnter={() => setShowLogout(true)}
         onMouseLeave={() => setShowLogout(false)}
       >
-        <img
-          src="https://randomuser.me/api/portraits/men/32.jpg"
-          alt="User avatar"
-          className="navbar-avatar"
-        />
+            {/* Load avatar for user id=0, fall back to static url while loading/error */}
+            <img
+              src={avatarUrl ?? "https://randomuser.me/api/portraits/men/32.jpg"}
+              alt="User avatar"
+              className="navbar-avatar"
+            />
 
         <div className="navbar-identity">
           {showLogout ? (
