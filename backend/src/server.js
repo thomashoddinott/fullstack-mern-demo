@@ -71,6 +71,25 @@ app.get("/api/users/:id/avatar", async (req, res) => {
   }
 });
 
+// GET only booked_classes_id for a user
+app.get("/api/users/:id/booked-classes-id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid user id" });
+
+    const doc = await db.collection("users").findOne({ id }, { projection: { booked_classes_id: 1, _id: 0 } });
+
+    if (!doc) return res.status(404).json({ message: "User not found" });
+
+    // If the field doesn't exist, return an empty array for convenience
+    const booked = doc.booked_classes_id ?? [];
+    res.json({ booked_classes_id: booked });
+  } catch (err) {
+    console.error("Error fetching booked_classes_id:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // PUT user avatar (accepts multipart/form-data with field `avatar`)
 app.put("/api/users/:id/avatar", upload.single("avatar"), async (req, res) => {
   try {
