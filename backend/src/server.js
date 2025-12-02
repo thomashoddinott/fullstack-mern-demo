@@ -1,8 +1,12 @@
 import express from "express";
-import { MongoClient } from "mongodb";
+import multer from "multer";
+import { MongoClient, Binary } from "mongodb";
 
 const app = express();
 app.use(express.json());
+
+// Multer memory storage for file uploads
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 const MONGO_URI = "mongodb://localhost:27017";
 const client = new MongoClient(MONGO_URI);
@@ -63,6 +67,36 @@ app.get("/api/users/:id/avatar", async (req, res) => {
     res.send(imageBuffer);
   } catch (err) {
     console.error("Error fetching user avatar:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PUT user avatar (accepts multipart/form-data with field `avatar`)
+app.put("/api/users/:id/avatar", upload.single("avatar"), async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    if (Number.isNaN(userId)) return res.status(400).json({ message: "Invalid user id" });
+
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ message: "No avatar file uploaded (field name: 'avatar')" });
+    }
+
+    const mime = req.file.mimetype || "image/jpeg";
+    const buffer = req.file.buffer;
+
+    // Store both a data-URI string (for easy retrieval) and binary data (for tools/users that want raw bytes)
+    const base64 = buffer.toString("base64");
+    const dataUri = `data:${mime};base64,${base64}`;
+
+    await db.collection("user-avatars").updateOne(
+      { userId },
+      { $set: { userId, avatar: dataUri, data: new Binary(buffer) } },
+      { upsert: true }
+    );
+
+    res.json({ message: "Avatar updated", userId });
+  } catch (err) {
+    console.error("Error updating user avatar:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
