@@ -1,26 +1,8 @@
 import "./ClassCard.css";
-
-const classStyles = {
-  "BJJ - Gi": {
-    color: "bg-red-600",
-    logo: "https://static.thenounproject.com/png/631848-200.png",
-  },
-  "BJJ - No-Gi": {
-    color: "bg-gray-500",
-    logo: "https://static.thenounproject.com/png/1995411-200.png",
-  },
-  "Yoga Flow": {
-    color: "bg-green-500",
-    logo: "https://static.thenounproject.com/png/1995732-200.png",
-  },
-  "Strength & Conditioning": {
-    color: "bg-orange-500",
-    logo: "https://static.thenounproject.com/png/1980371-200.png",
-  },
-};
+import { getClassStyle } from "../constants/classStyles";
 
 export default function ClassCard({ title, teacher, datetime, spots }) {
-  const style = classStyles[title] || { color: "bg-gray-400", logo: "" };
+  const style = getClassStyle(title);
 
   return (
     <div className="class-card">
