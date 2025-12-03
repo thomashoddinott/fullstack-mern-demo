@@ -13,7 +13,7 @@ function formatDateString(dateStr) {
   });
 }
 
-export default function UpcomingClassRow({ title, date, status = "Confirmed", color, icon }) {
+export default function UpcomingClassRow({ id, title, date, status = "Confirmed", color, icon, onRemove }) {
   const formatted = formatDateString(date);
 
   return (
@@ -43,7 +43,7 @@ export default function UpcomingClassRow({ title, date, status = "Confirmed", co
         </span>
         <button
           onClick={() => {
-            alert(`cancel: ${title}`);
+            if (typeof onRemove === "function") onRemove(id);
           }}
           className="upcoming-class-cancel"
           aria-label={`Cancel ${title}`}>
