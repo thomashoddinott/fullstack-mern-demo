@@ -193,6 +193,23 @@ app.get("/api/scheduled-classes", async (req, res) => {
   }
 });
 
+// GET scheduled class by ID
+app.get("/api/scheduled-classes/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid class id" });
+
+    const scheduledClass = await db.collection("scheduledClasses").findOne({ id });
+
+    if (!scheduledClass) return res.status(404).json({ message: "Scheduled class not found" });
+
+    res.json(scheduledClass);
+  } catch (err) {
+    console.error("Error fetching scheduled class:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });
