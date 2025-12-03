@@ -2,7 +2,7 @@ import "./UpcomingClasses.css";
 import "./UpcomingClasses.css";
 import UpcomingClassRow from "./UpcomingClassRow";
 import { getClassStyle } from "../constants/classStyles";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 export default function UpcomingClasses() {
@@ -38,6 +38,49 @@ export default function UpcomingClasses() {
   const loading = isBookedLoading || isClassesLoading;
   const error = isBookedError || isClassesError;
 
+  const queryClient = useQueryClient();
+
+  const removeMutation = useMutation({
+    mutationFn: ({ classId }) =>
+      axios.put(`/api/users/0/booked-classes`, { action: "remove", classId }).then((r) => r.data),
+    // optimistic update
+    onMutate: async ({ classId }) => {
+      await queryClient.cancelQueries(["booked-classes", 0]);
+      await queryClient.cancelQueries(["booked-classes-id", 0]);
+
+      const previousClasses = queryClient.getQueryData(["booked-classes", 0]);
+      const previousIds = queryClient.getQueryData(["booked-classes-id", 0]);
+
+      // optimistically remove from booked-classes list
+      if (previousClasses) {
+        queryClient.setQueryData(["booked-classes", 0], (old) =>
+          (old || []).filter((c) => c.id !== classId)
+        );
+      }
+
+      if (previousIds) {
+        queryClient.setQueryData(["booked-classes-id", 0], (old) => ({
+          booked_classes_id: (old?.booked_classes_id || []).filter((i) => i !== classId),
+        }));
+      }
+
+      return { previousClasses, previousIds };
+    },
+    onError: (_err, variables, context) => {
+      // rollback
+      if (context?.previousClasses) {
+        queryClient.setQueryData(["booked-classes", 0], context.previousClasses);
+      }
+      if (context?.previousIds) {
+        queryClient.setQueryData(["booked-classes-id", 0], context.previousIds);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["booked-classes", 0]);
+      queryClient.invalidateQueries(["booked-classes-id", 0]);
+    },
+  });
+
   if (loading) {
     return <div className="upcoming-classes-container">Loading upcoming classes...</div>;
   }
@@ -67,10 +110,12 @@ export default function UpcomingClasses() {
             return (
               <UpcomingClassRow
                 key={c.id}
+                id={c.id}
                 title={c.title}
                 date={c.date}
                 color={style.color}
                 icon={style.logo}
+                onRemove={() => removeMutation.mutate({ classId: c.id })}
               />
             );
           })}
