@@ -210,6 +210,43 @@ app.get("/api/scheduled-classes/:id", async (req, res) => {
   }
 });
 
+// PUT update a user's booked classes
+// Body can be either:
+// { booked_classes_id: [1,2,3] }    -> replace the array
+// { action: 'remove', classId: 5 }   -> remove single id
+// { action: 'add', classId: 5 }      -> add single id (no duplicates)
+app.put("/api/users/:id/booked-classes", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid user id" });
+
+    const { booked_classes_id, action, classId } = req.body || {};
+
+    const coll = db.collection("users");
+
+    // Ensure user exists
+    const user = await coll.findOne({ id });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (Array.isArray(booked_classes_id)) {
+      // Replace the array
+      await coll.updateOne({ id }, { $set: { booked_classes_id } });
+    } else if (action === "remove" && typeof classId !== "undefined") {
+      await coll.updateOne({ id }, { $pull: { booked_classes_id: classId } });
+    } else if (action === "add" && typeof classId !== "undefined") {
+      await coll.updateOne({ id }, { $addToSet: { booked_classes_id: classId } });
+    } else {
+      return res.status(400).json({ message: "Invalid body. Provide booked_classes_id array or action + classId." });
+    }
+
+    const updated = await coll.findOne({ id }, { projection: { booked_classes_id: 1, _id: 0 } });
+    return res.json({ booked_classes_id: updated.booked_classes_id ?? [] });
+  } catch (err) {
+    console.error("Error updating booked_classes_id:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });
