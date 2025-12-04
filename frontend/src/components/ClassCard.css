@@ -39,3 +39,9 @@
 .class-card-button {
   @apply w-full py-2 text-white font-medium rounded-md hover:opacity-90 transition;
 }
+
+/* Disabled (greyed-out) state for the whole card */
+.class-card-button--disabled {
+  /* visually muted, but only for the button itself */
+  @apply bg-gray-300 text-gray-700 opacity-80 filter grayscale cursor-not-allowed;
+}

@@ -31,6 +31,14 @@ export default function BookClasses() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // fetch the user's booked class ids so we can disable booking for already-booked classes
+  const { data: bookedResp } = useQuery({
+    queryKey: ["booked-classes-id", 0],
+    queryFn: () => axios.get(`/api/users/0/booked-classes-id`).then((r) => r.data),
+    staleTime: 1000 * 60 * 1,
+  });
+  const bookedIds = bookedResp?.booked_classes_id ?? [];
+
   const teacherMap = (teachers || []).reduce((acc, t) => {
     acc[t.id] = t;
     return acc;
@@ -93,6 +101,7 @@ export default function BookClasses() {
                 teacher={teacher}
                 datetime={datetime}
                 spots={spots}
+                disabled={bookedIds.includes(classItem.id ?? classItem._id)}
               />
             );
           })
