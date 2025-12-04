@@ -1,7 +1,7 @@
 import "./ClassCard.css";
 import { getClassStyle } from "../constants/classStyles";
 
-export default function ClassCard({ title, teacher, datetime, spots }) {
+export default function ClassCard({ title, teacher, datetime, spots, disabled = false }) {
   const style = getClassStyle(title);
 
   return (
@@ -31,10 +31,14 @@ export default function ClassCard({ title, teacher, datetime, spots }) {
       {/* Footer */}
       <div className="class-card-footer">
         <button
-          className={`class-card-button ${style.color}`}
-          onClick={() => alert("Book Class: " + title)}
+          className={`class-card-button ${style.color} ${disabled ? 'class-card-button--disabled' : ''}`}
+          onClick={() => {
+            if (disabled) return;
+            alert("Book Class: " + title);
+          }}
+          disabled={disabled}
         >
-          Book Class
+          {disabled ? "Already Booked" : "Book Class"}
         </button>
       </div>
     </div>
