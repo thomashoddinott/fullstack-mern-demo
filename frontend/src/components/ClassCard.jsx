@@ -3,17 +3,37 @@ import { getClassStyle } from "../constants/classStyles";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export default function ClassCard({ id, title, teacher, datetime, spots, disabled = false }) {
+export default function ClassCard({
+  id,
+  title,
+  teacher,
+  datetime,
+  spots,
+  disabled = false,
+}) {
   const style = getClassStyle(title);
   const queryClient = useQueryClient();
 
   const addBookingMutation = useMutation({
     mutationFn: (classId) =>
-      axios
-        .put(`/api/users/0/booked-classes`, { action: "add", classId })
-        .then((r) => r.data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["booked-classes-id", 0] });
+      axios.put(`/api/users/0/booked-classes`, { action: "add", classId }),
+    onMutate: async (classId) => {
+      await queryClient.cancelQueries(["booked-classes-id", 0]);
+      const prev = queryClient.getQueryData(["booked-classes-id", 0]);
+
+      queryClient.setQueryData(["booked-classes-id", 0], (old) => ({
+        ...old,
+        booked_classes_id: [...(old?.booked_classes_id || []), classId],
+      }));
+
+      return { prev };
+    },
+    onError: (err, vars, context) => {
+      queryClient.setQueryData(["booked-classes-id", 0], context.prev);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["booked-classes-id", 0]);
+      queryClient.invalidateQueries(["booked-classes", 0]);
     },
   });
 
@@ -21,7 +41,11 @@ export default function ClassCard({ id, title, teacher, datetime, spots, disable
     <div className="class-card">
       {/* Header */}
       <div className={`class-card-header ${style.color}`}>
-        <img src={style.logo} alt={`${title} logo`} className="class-card-logo" />
+        <img
+          src={style.logo}
+          alt={`${title} logo`}
+          className="class-card-logo"
+        />
       </div>
 
       {/* Body */}
@@ -44,7 +68,9 @@ export default function ClassCard({ id, title, teacher, datetime, spots, disable
       {/* Footer */}
       <div className="class-card-footer">
         <button
-          className={`class-card-button ${style.color} ${disabled ? "class-card-button--disabled" : ""}`}
+          className={`class-card-button ${style.color} ${
+            disabled ? "class-card-button--disabled" : ""
+          }`}
           onClick={() => {
             if (disabled || addBookingMutation.isLoading) return;
             if (!id) return;
