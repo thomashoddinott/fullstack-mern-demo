@@ -1,8 +1,21 @@
 import "./ClassCard.css";
 import { getClassStyle } from "../constants/classStyles";
+import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export default function ClassCard({ title, teacher, datetime, spots, disabled = false }) {
+export default function ClassCard({ id, title, teacher, datetime, spots, disabled = false }) {
   const style = getClassStyle(title);
+  const queryClient = useQueryClient();
+
+  const addBookingMutation = useMutation({
+    mutationFn: (classId) =>
+      axios
+        .put(`/api/users/0/booked-classes`, { action: "add", classId })
+        .then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["booked-classes-id", 0] });
+    },
+  });
 
   return (
     <div className="class-card">
@@ -31,14 +44,19 @@ export default function ClassCard({ title, teacher, datetime, spots, disabled = 
       {/* Footer */}
       <div className="class-card-footer">
         <button
-          className={`class-card-button ${style.color} ${disabled ? 'class-card-button--disabled' : ''}`}
+          className={`class-card-button ${style.color} ${disabled ? "class-card-button--disabled" : ""}`}
           onClick={() => {
-            if (disabled) return;
-            alert("Book Class: " + title);
+            if (disabled || addBookingMutation.isLoading) return;
+            if (!id) return;
+            addBookingMutation.mutate(id);
           }}
-          disabled={disabled}
+          disabled={disabled || addBookingMutation.isLoading}
         >
-          {disabled ? "Already Booked" : "Book Class"}
+          {disabled
+            ? "Already Booked"
+            : addBookingMutation.isLoading
+            ? "Booking..."
+            : "Book Class"}
         </button>
       </div>
     </div>

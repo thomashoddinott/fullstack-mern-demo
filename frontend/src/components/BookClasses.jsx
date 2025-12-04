@@ -97,6 +97,7 @@ export default function BookClasses() {
             return (
               <ClassCard
                 key={key}
+                id={classItem.id ?? classItem._id}
                 title={title}
                 teacher={teacher}
                 datetime={datetime}
