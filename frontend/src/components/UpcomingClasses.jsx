@@ -29,10 +29,11 @@ export default function UpcomingClasses() {
       const results = await Promise.all(
         ids.map((id) => axios.get(`/api/scheduled-classes/${id}`).then((r) => r.data))
       );
-      // map to expected shape for UpcomingClassRow: title and date (date = start)
+      // sort chronologically by start date, then map to expected shape for UpcomingClassRow
+      results.sort((a, b) => new Date(a.start) - new Date(b.start));
       return results.map((r) => ({ title: r.title, date: r.start, id: r.id }));
     },
-    enabled: !!bookedResp,
+    enabled: Array.isArray(bookedResp?.booked_classes_id),
   });
 
   const loading = isBookedLoading || isClassesLoading;
