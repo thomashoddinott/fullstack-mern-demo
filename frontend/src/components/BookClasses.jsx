@@ -88,8 +88,8 @@ export default function BookClasses() {
             }
 
             const datetime = classItem.start ? formatClassTime(classItem.start, classItem.end) : (classItem.description || "");
-            const spots = (classItem.spots_available !== undefined && classItem.spots_total !== undefined)
-              ? `${classItem.spots_available}/${classItem.spots_total} spots`
+            const spots = (classItem.spots_booked !== undefined && classItem.spots_total !== undefined)
+              ? `${classItem.spots_booked}/${classItem.spots_total} spots`
               : "—";
 
             const key = classItem.id ?? classItem._id ?? title;
@@ -97,6 +97,7 @@ export default function BookClasses() {
             return (
               <ClassCard
                 key={key}
+                id={classItem.id ?? classItem._id}
                 title={title}
                 teacher={teacher}
                 datetime={datetime}

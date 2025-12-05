@@ -29,10 +29,11 @@ export default function UpcomingClasses() {
       const results = await Promise.all(
         ids.map((id) => axios.get(`/api/scheduled-classes/${id}`).then((r) => r.data))
       );
-      // map to expected shape for UpcomingClassRow: title and date (date = start)
+      // sort chronologically by start date, then map to expected shape for UpcomingClassRow
+      results.sort((a, b) => new Date(a.start) - new Date(b.start));
       return results.map((r) => ({ title: r.title, date: r.start, id: r.id }));
     },
-    enabled: !!bookedResp,
+    enabled: Array.isArray(bookedResp?.booked_classes_id),
   });
 
   const loading = isBookedLoading || isClassesLoading;
@@ -41,8 +42,12 @@ export default function UpcomingClasses() {
   const queryClient = useQueryClient();
 
   const removeMutation = useMutation({
-    mutationFn: ({ classId }) =>
-      axios.put(`/api/users/0/booked-classes`, { action: "remove", classId }).then((r) => r.data),
+    mutationFn: async ({ classId }) => {
+      const resp = await axios.put(`/api/users/0/booked-classes`, { action: "remove", classId });
+      // decrement spots_booked for the scheduled class
+      await axios.put(`/api/scheduled-classes/${classId}/minus1`);
+      return resp.data;
+    },
     // optimistic update
     onMutate: async ({ classId }) => {
       await queryClient.cancelQueries(["booked-classes", 0]);
@@ -78,6 +83,7 @@ export default function UpcomingClasses() {
     onSettled: () => {
       queryClient.invalidateQueries(["booked-classes", 0]);
       queryClient.invalidateQueries(["booked-classes-id", 0]);
+      queryClient.invalidateQueries(["scheduled-classes"]);
     },
   });
 

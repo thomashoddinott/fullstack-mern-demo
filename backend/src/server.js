@@ -210,6 +210,40 @@ app.get("/api/scheduled-classes/:id", async (req, res) => {
   }
 });
 
+// PUT update spots_booked for scheduled class (plus1 or minus1)
+app.put("/api/scheduled-classes/:id/:action", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid class id" });
+
+    const action = req.params.action;
+    let delta;
+    if (action === "plus1") delta = 1;
+    else if (action === "minus1") delta = -1;
+    else return res.status(400).json({ message: "Action must be plus1 or minus1" });
+
+    const coll = db.collection("scheduledClasses");
+    const result = await coll.findOneAndUpdate(
+      { id },
+      { $inc: { spots_booked: delta } },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) return res.status(404).json({ message: "Scheduled class not found" });
+
+    // Clamp to 0 if negative
+    if (result.spots_booked < 0) {
+      await coll.updateOne({ id }, { $set: { spots_booked: 0 } });
+      result.spots_booked = 0;
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error("Error updating spots:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // PUT update a user's booked classes
 // Body can be either:
 // { booked_classes_id: [1,2,3] }    -> replace the array
