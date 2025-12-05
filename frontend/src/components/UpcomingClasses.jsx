@@ -42,8 +42,12 @@ export default function UpcomingClasses() {
   const queryClient = useQueryClient();
 
   const removeMutation = useMutation({
-    mutationFn: ({ classId }) =>
-      axios.put(`/api/users/0/booked-classes`, { action: "remove", classId }).then((r) => r.data),
+    mutationFn: async ({ classId }) => {
+      const resp = await axios.put(`/api/users/0/booked-classes`, { action: "remove", classId });
+      // decrement spots_booked for the scheduled class
+      await axios.put(`/api/scheduled-classes/${classId}/minus1`);
+      return resp.data;
+    },
     // optimistic update
     onMutate: async ({ classId }) => {
       await queryClient.cancelQueries(["booked-classes", 0]);
@@ -79,6 +83,7 @@ export default function UpcomingClasses() {
     onSettled: () => {
       queryClient.invalidateQueries(["booked-classes", 0]);
       queryClient.invalidateQueries(["booked-classes-id", 0]);
+      queryClient.invalidateQueries(["scheduled-classes"]);
     },
   });
 

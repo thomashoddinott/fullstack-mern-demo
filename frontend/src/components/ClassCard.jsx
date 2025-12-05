@@ -15,8 +15,12 @@ export default function ClassCard({
   const queryClient = useQueryClient();
 
   const addBookingMutation = useMutation({
-    mutationFn: (classId) =>
-      axios.put(`/api/users/0/booked-classes`, { action: "add", classId }),
+    mutationFn: async (classId) => {
+      const resp = await axios.put(`/api/users/0/booked-classes`, { action: "add", classId });
+      // increment spots_booked on the scheduled class
+      await axios.put(`/api/scheduled-classes/${classId}/plus1`);
+      return resp.data;
+    },
     onMutate: async (classId) => {
       await queryClient.cancelQueries(["booked-classes-id", 0]);
       const prev = queryClient.getQueryData(["booked-classes-id", 0]);
@@ -34,6 +38,7 @@ export default function ClassCard({
     onSettled: () => {
       queryClient.invalidateQueries(["booked-classes-id", 0]);
       queryClient.invalidateQueries(["booked-classes", 0]);
+      queryClient.invalidateQueries(["scheduled-classes"]);
     },
   });
 
