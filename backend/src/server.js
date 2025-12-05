@@ -223,19 +223,36 @@ app.put("/api/scheduled-classes/:id/:action", async (req, res) => {
     else return res.status(400).json({ message: "Action must be plus1 or minus1" });
 
     const coll = db.collection("scheduledClasses");
+    
+    // First, get the current document to check constraints
+    const currentDoc = await coll.findOne({ id });
+    if (!currentDoc) return res.status(404).json({ message: "Scheduled class not found" });
+
+    const newSpotsBooked = currentDoc.spots_booked + delta;
+
+    // Check lower bound
+    if (newSpotsBooked < 0) {
+      return res.status(400).json({ 
+        message: "Cannot decrease spots below 0",
+        current: currentDoc.spots_booked 
+      });
+    }
+
+    // Check upper bound
+    if (newSpotsBooked > currentDoc.spots_total) {
+      return res.status(400).json({ 
+        message: "Class is full - cannot exceed total spots",
+        spots_booked: currentDoc.spots_booked,
+        spots_total: currentDoc.spots_total
+      });
+    }
+
+    // Perform the update
     const result = await coll.findOneAndUpdate(
       { id },
       { $inc: { spots_booked: delta } },
       { returnDocument: 'after' }
     );
-
-    if (!result) return res.status(404).json({ message: "Scheduled class not found" });
-
-    // Clamp to 0 if negative
-    if (result.spots_booked < 0) {
-      await coll.updateOne({ id }, { $set: { spots_booked: 0 } });
-      result.spots_booked = 0;
-    }
 
     res.json(result);
   } catch (err) {
