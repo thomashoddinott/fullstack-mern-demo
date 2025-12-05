@@ -94,6 +94,10 @@ export default function BookClasses() {
 
             const key = classItem.id ?? classItem._id ?? title;
 
+            const isFull = (classItem.spots_booked !== undefined && classItem.spots_total !== undefined)
+              ? (classItem.spots_booked >= classItem.spots_total)
+              : false;
+
             return (
               <ClassCard
                 key={key}
@@ -102,7 +106,8 @@ export default function BookClasses() {
                 teacher={teacher}
                 datetime={datetime}
                 spots={spots}
-                disabled={bookedIds.includes(classItem.id ?? classItem._id)}
+                disabled={bookedIds.includes(classItem.id ?? classItem._id) || isFull}
+                isFull={isFull}
               />
             );
           })

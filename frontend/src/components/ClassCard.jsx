@@ -9,7 +9,8 @@ export default function ClassCard({
   teacher,
   datetime,
   spots,
-  disabled = false,
+  disabled = false, // I think this needs refactoring, disabled initially meant "already booked"
+  isFull = false,
 }) {
   const style = getClassStyle(title);
   const queryClient = useQueryClient();
@@ -74,16 +75,18 @@ export default function ClassCard({
       <div className="class-card-footer">
         <button
           className={`class-card-button ${style.color} ${
-            disabled ? "class-card-button--disabled" : ""
+            (disabled || isFull) ? "class-card-button--disabled" : ""
           }`}
           onClick={() => {
-            if (disabled || addBookingMutation.isLoading) return;
+            if (disabled || isFull || addBookingMutation.isLoading) return;
             if (!id) return;
             addBookingMutation.mutate(id);
           }}
-          disabled={disabled || addBookingMutation.isLoading}
+          disabled={disabled || isFull || addBookingMutation.isLoading}
         >
-          {disabled
+          {isFull
+            ? "Class Full"
+            : disabled
             ? "Already Booked"
             : addBookingMutation.isLoading
             ? "Booking..."
