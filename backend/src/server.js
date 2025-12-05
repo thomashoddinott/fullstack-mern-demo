@@ -210,7 +210,7 @@ app.get("/api/scheduled-classes/:id", async (req, res) => {
   }
 });
 
-// PUT update spots_available for scheduled class (plus1 or minus1)
+// PUT update spots_booked for scheduled class (plus1 or minus1)
 app.put("/api/scheduled-classes/:id/:action", async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -225,16 +225,16 @@ app.put("/api/scheduled-classes/:id/:action", async (req, res) => {
     const coll = db.collection("scheduledClasses");
     const result = await coll.findOneAndUpdate(
       { id },
-      { $inc: { spots_available: delta } },
+      { $inc: { spots_booked: delta } },
       { returnDocument: 'after' }
     );
 
     if (!result) return res.status(404).json({ message: "Scheduled class not found" });
 
     // Clamp to 0 if negative
-    if (result.spots_available < 0) {
-      await coll.updateOne({ id }, { $set: { spots_available: 0 } });
-      result.spots_available = 0;
+    if (result.spots_booked < 0) {
+      await coll.updateOne({ id }, { $set: { spots_booked: 0 } });
+      result.spots_booked = 0;
     }
 
     res.json(result);
