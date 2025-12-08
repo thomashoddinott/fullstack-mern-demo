@@ -9,32 +9,28 @@ const uniqueBaseClasses = [
     teacher: "Matteo",
     time_offset: { hours: 7, minutes: 0 }, // Using a fixed time for generation simplicity
     spots_booked: 8,
-    spots_total: 15,
-    backgroundColor: "#7EC2B9",
+    spots_total: 15
   },
   {
     title: "BJJ - No-Gi",
     teacher: "Matteo",
     time_offset: { hours: 9, minutes: 30 },
     spots_booked: 12,
-    spots_total: 15,
-    backgroundColor: "#C7E76D",
+    spots_total: 15
   },
   {
     title: "Yoga Flow",
     teacher: "Maria",
     time_offset: { hours: 8, minutes: 0 },
     spots_booked: 5,
-    spots_total: 10,
-    backgroundColor: "#9DC4E5",
+    spots_total: 10
   },
   {
     title: "Strength & Conditioning",
     teacher: "John",
     time_offset: { hours: 10, minutes: 0 },
     spots_booked: 15,
-    spots_total: 20,
-    backgroundColor: "#F7D47B",
+    spots_total: 20
   },
 ];
 
@@ -82,8 +78,7 @@ while (
     start: toISOStringLocal(startTime),
     end: toISOStringLocal(endTime),
     spots_booked: baseClass.spots_booked,
-    spots_total: baseClass.spots_total,
-    backgroundColor: baseClass.backgroundColor,
+    spots_total: baseClass.spots_total
   };
 
   generatedClasses.push(newClass);
