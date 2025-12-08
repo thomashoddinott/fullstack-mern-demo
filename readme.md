@@ -8,7 +8,4 @@ shell3 > `cd backend` & `npm run dev`
 optional > `docker exec -it bjj-mongo mongosh` take a look around mongo (VSCode: use DocumentDB extension) 
 
 ### Todos
-- 🚧 Flesh out basic functionality (renew/upgrade subscription plan, sign up for classes, change profile pic, etc)
-- Tests
-- Firebase
-- Figure out payments (at least mocked version)
+- Using [Issues](https://github.com/thomashoddinott/fullstack-mern-demo/issues)
