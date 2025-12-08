@@ -3,21 +3,22 @@ const classStyles = {
     color: "bg-red-600",
     hexColor: "#DC2626",
     logo: "https://static.thenounproject.com/png/631848-200.png",
+    //ideally find a better gi logo from `vexels.com` to have consistent styling
   },
   "BJJ - No-Gi": {
     color: "bg-gray-500",
     hexColor: "#6B7280",
-    logo: "https://static.thenounproject.com/png/1995411-200.png",
+    logo: "https://images.vexels.com/media/users/3/149933/isolated/preview/efc9a9eee3db068ec6f2839b1cc78d13-men-wrestling-silhouette.png",
   },
   "Yoga Flow": {
     color: "bg-green-500",
     hexColor: "#22C55E",
-    logo: "https://static.thenounproject.com/png/1995732-200.png",
+    logo: "https://images.vexels.com/media/users/3/130614/isolated/preview/4e81e83e192abbb5a774d503c9bc9387-girl-yoga-practice-silhouette.png",
   },
   "Strength & Conditioning": {
     color: "bg-orange-500",
     hexColor: "#F97316",
-    logo: "https://static.thenounproject.com/png/1980371-200.png",
+    logo: "https://images.vexels.com/media/users/3/144850/isolated/preview/1f31f857229d2c923623de9fd83850dc-bodybuilder-training-silhouette.png",
   },
 };
 
