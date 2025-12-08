@@ -176,7 +176,7 @@ app.get("/api/scheduled-classes", async (req, res) => {
   try {
     const limitParam = req.query.limit;
     const coll = db.collection("scheduledClasses");
-    let cursor = coll.find();
+    let cursor = coll.find().sort({ start: 1 });
 
     if (limitParam !== undefined) {
       const parsed = parseInt(limitParam, 10);
