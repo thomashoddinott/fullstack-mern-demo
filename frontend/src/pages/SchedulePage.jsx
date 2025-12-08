@@ -3,6 +3,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { getClassStyle } from "../constants/classStyles";
 
 export default function SchedulePage() {
   const { data: scheduled, isLoading, isError } = useQuery({
@@ -28,13 +29,17 @@ export default function SchedulePage() {
     );
   }
 
-  const events = (scheduled || []).map((s) => ({
-    id: s.id,
-    title: s.title || s.name || s.title,
-    start: s.start,
-    end: s.end,
-    backgroundColor: s.backgroundColor,
-  }));
+  const events = (scheduled || []).map((s) => {
+    const title = s.title || s.name || "";
+    const style = getClassStyle(title) || {};
+    return {
+      id: s.id,
+      title,
+      start: s.start,
+      end: s.end,
+      backgroundColor: style.hexColor,
+    };
+  });
 
   return (
     <div className="pt-20 px-6 max-w-6xl mx-auto">

@@ -1,18 +1,22 @@
 const classStyles = {
   "BJJ - Gi": {
     color: "bg-red-600",
+    hexColor: "#DC2626",
     logo: "https://static.thenounproject.com/png/631848-200.png",
   },
   "BJJ - No-Gi": {
     color: "bg-gray-500",
+    hexColor: "#6B7280",
     logo: "https://static.thenounproject.com/png/1995411-200.png",
   },
   "Yoga Flow": {
     color: "bg-green-500",
+    hexColor: "#22C55E",
     logo: "https://static.thenounproject.com/png/1995732-200.png",
   },
   "Strength & Conditioning": {
     color: "bg-orange-500",
+    hexColor: "#F97316",
     logo: "https://static.thenounproject.com/png/1980371-200.png",
   },
 };
