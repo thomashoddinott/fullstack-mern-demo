@@ -1,11 +1,13 @@
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { getClassStyle } from "../constants/classStyles";
 
 export default function SchedulePage() {
+  const queryClient = useQueryClient();
+
   const { data: scheduled, isLoading, isError } = useQuery({
     queryKey: ["scheduled-classes"],
     queryFn: () => axios.get('/api/scheduled-classes').then((res) => res.data),
@@ -65,8 +67,43 @@ export default function SchedulePage() {
         slotMaxTime="22:00:00"
         allDaySlot={false}
         events={events}
-        eventClick={(info) => {
-          alert(`Book class: ${info.event.title}`);
+        eventClick={async (info) => {
+          const classId = info.event.id ?? info.event.extendedProps?._id;
+
+          const eventIdStr = String(classId);
+          const isBooked =
+            bookedResp?.booked_classes_id?.includes(classId) ||
+            bookedResp?.booked_classes_id?.includes(eventIdStr);
+
+          if (isBooked) {
+            const ok = window.confirm(`You are subscribed to "${info.event.title}". Unsubscribe?`);
+            if (!ok) return;
+            try {
+              await axios.put(`/api/users/0/booked-classes`, { action: "remove", classId });
+              await axios.put(`/api/scheduled-classes/${classId}/minus1`);
+              queryClient.invalidateQueries(["booked-classes", 0]);
+              queryClient.invalidateQueries(["booked-classes-id", 0]);
+              queryClient.invalidateQueries(["scheduled-classes"]);
+              window.alert("Unsubscribed from class");
+            } catch (err) {
+              console.error(err);
+              window.alert("Error unsubscribing from class");
+            }
+          } else {
+            const ok = window.confirm(`Subscribe to "${info.event.title}"?`);
+            if (!ok) return;
+            try {
+              await axios.put(`/api/users/0/booked-classes`, { action: "add", classId });
+              await axios.put(`/api/scheduled-classes/${classId}/plus1`);
+              queryClient.invalidateQueries(["booked-classes", 0]);
+              queryClient.invalidateQueries(["booked-classes-id", 0]);
+              queryClient.invalidateQueries(["scheduled-classes"]);
+              window.alert("Subscribed to class");
+            } catch (err) {
+              console.error(err);
+              window.alert("Error subscribing to class");
+            }
+          }
         }}
         height="auto"
         headerToolbar={{
