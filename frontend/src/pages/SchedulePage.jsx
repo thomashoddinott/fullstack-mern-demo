@@ -11,6 +11,13 @@ export default function SchedulePage() {
     queryFn: () => axios.get('/api/scheduled-classes').then((res) => res.data),
   });
 
+  // fetch the user's booked class ids so we can mark booked classes with a check
+  const { data: bookedResp } = useQuery({
+    queryKey: ["booked-classes-id", 0],
+    queryFn: () => axios.get(`/api/users/0/booked-classes-id`).then((r) => r.data),
+    staleTime: 1000 * 60 * 1,
+  });
+
   if (isLoading) {
     return (
       <div className="pt-20 px-6 max-w-6xl mx-auto">
@@ -29,11 +36,17 @@ export default function SchedulePage() {
     );
   }
 
+  const bookedIds = new Set(bookedResp?.booked_classes_id || []);
+
   const events = (scheduled || []).map((s) => {
-    const title = s.title || s.name || "";
+    const classId = s.id ?? s._id;
+    let title = s.title || s.name || "";
     const style = getClassStyle(title) || {};
+    if (classId && bookedIds.has(classId)) {
+      title = `${title} ✅`;
+    }
     return {
-      id: s.id,
+      id: classId,
       title,
       start: s.start,
       end: s.end,
