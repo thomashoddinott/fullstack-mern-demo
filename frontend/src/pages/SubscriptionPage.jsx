@@ -11,11 +11,9 @@ export default function SubscriptionPage() {
 
   const currentMembership = {
     title: "1 Month",
-    subtitle: "Unlimited access to all classes and facilities",
     daysLeft: 23,
     price: "$99",
     billing: "Monthly",
-    autoRenew: "December 31, 2025",
   };
 
   return (
@@ -25,7 +23,7 @@ export default function SubscriptionPage() {
       <div className="current-card">
         <div>
           <h2 className="current-title">{currentMembership.title}</h2>
-          <p className="current-subtitle">{currentMembership.subtitle}</p>
+          <p className="current-subtitle">Unlimited access to all classes and facilities</p>
 
           <div className="current-stats">
             <div>
@@ -46,9 +44,6 @@ export default function SubscriptionPage() {
           >
             Renew Subscription
           </button>
-          <p className="autorenew-text">
-            Auto-renewal: {currentMembership.autoRenew}
-          </p>
         </div>
       </div>
 
