@@ -104,7 +104,7 @@ db.users.insertMany([
     status: "Active",
     subscription: {
       plan_id: "1m",
-      expiry: "2024-03-15T00:00:00Z",
+      expiry: "2025-12-31T00:00:00Z",
     },
     stats: {
       classes_this_month: 12,
@@ -120,7 +120,7 @@ db.users.insertMany([
     status: "Active",
     subscription: {
       plan_id: "3m",
-      expiry: "2025-06-01T00:00:00Z",
+      expiry: "2025-12-31T00:00:00Z",
     },
     stats: {
       classes_this_month: 8,
@@ -136,7 +136,7 @@ db.users.insertMany([
     status: "Inactive",
     subscription: {
       plan_id: "Basic",
-      expiry: "2023-12-31T00:00:00Z",
+      expiry: "2025-12-31T00:00:00Z",
     },
     stats: {
       classes_this_month: 0,
