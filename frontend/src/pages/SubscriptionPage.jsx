@@ -15,7 +15,7 @@ export default function SubscriptionPage() {
     daysLeft: 23,
     price: "$99",
     billing: "Monthly",
-    autoRenew: "March 15, 2024",
+    autoRenew: "December 31, 2025",
   };
 
   return (

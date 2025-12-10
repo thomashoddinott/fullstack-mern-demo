@@ -49,7 +49,7 @@ export default function MembershipPanel() {
         >
           Renew Subscription
         </button>
-        <p className="membership-autorenew">Auto-renewal: March 15, 2024</p>
+        <p className="membership-autorenew">Auto-renewal: December 31, 2025</p>
       </div>
     </div>
   );
