@@ -131,6 +131,27 @@ app.get("/api/plans", async (req, res) => {
   }
 });
 
+// GET plan by plan id (returns single plan)
+app.get("/api/plans/:planId", async (req, res) => {
+  try {
+    const planId = req.params.planId;
+    if (!planId) return res.status(400).json({ message: "Missing plan id" });
+
+    // Support finding by either `id` (seeded) or `plan_id` (if used elsewhere)
+    const plan = await db
+      .collection("plans")
+      .findOne({ $or: [{ id: planId }, { plan_id: planId }] });
+
+    if (!plan) return res.status(404).json({ message: "Plan not found" });
+
+    // Return the plan object (caller can read `.label`)
+    res.json(plan);
+  } catch (err) {
+    console.error("Error fetching plan:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // GET all classes
 app.get("/api/classes", async (req, res) => {
   try {

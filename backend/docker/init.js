@@ -103,7 +103,7 @@ db.users.insertMany([
     rank: "Blue Belt",
     status: "Active",
     subscription: {
-      type: "Premium",
+      plan_id: "1m",
       expiry: "2024-03-15T00:00:00Z",
     },
     stats: {
@@ -119,7 +119,7 @@ db.users.insertMany([
     rank: "Purple Belt",
     status: "Active",
     subscription: {
-      type: "Gold",
+      plan_id: "3m",
       expiry: "2025-06-01T00:00:00Z",
     },
     stats: {
@@ -135,7 +135,7 @@ db.users.insertMany([
     rank: "White Belt",
     status: "Inactive",
     subscription: {
-      type: "Basic",
+      plan_id: "Basic",
       expiry: "2023-12-31T00:00:00Z",
     },
     stats: {
