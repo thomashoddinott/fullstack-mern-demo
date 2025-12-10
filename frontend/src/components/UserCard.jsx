@@ -28,6 +28,15 @@ export default function UserCard() {
     enabled: !!user, // only fetch avatar once user exists
   });
 
+  // Fetch plan label for display (map plan_id -> label)
+  const planId = user?.subscription?.plan_id;
+  const { data: planData } = useQuery({
+    queryKey: ["plan", planId],
+    queryFn: () => axios.get(`/api/plans/${planId}`).then((r) => r.data),
+    enabled: !!planId,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -82,6 +91,7 @@ export default function UserCard() {
     }
   }
 
+
   return (
     <div className="user-card">
       <div className="user-avatar-container">
@@ -119,7 +129,7 @@ export default function UserCard() {
       <div className="subscription-card">
         <div className="subscription-header">
           <p>Subscription</p>
-          <span className="subscription-badge">{user.subscription.type}</span>
+          <span className="subscription-badge">{planData?.label ?? user.subscription?.plan_id ?? "—"}</span>
         </div>
         <p className="subscription-expiry">Expires: {formattedExpiry}</p>
         <div className="progress-bar">
