@@ -20,6 +20,23 @@ export default function MembershipPanel() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // compute days left until expiry (rounded up), returns null when unknown
+  function computeDaysLeft(subscription) {
+    try {
+      const expiry = subscription?.expiry ? new Date(subscription.expiry) : null;
+      if (!expiry) return null;
+      const now = new Date();
+      // difference in milliseconds, convert to days (round up so partial day counts)
+      const diff = expiry.getTime() - now.getTime();
+      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      return days > 0 ? days : 0;
+    } catch {
+      return null;
+    }
+  }
+
+  const daysLeft = computeDaysLeft(user?.subscription);
+
   return (
     <div className="membership-panel">
       {/* Left: Membership info */}
@@ -31,7 +48,7 @@ export default function MembershipPanel() {
 
         <div className="membership-stats">
           <div>
-            <p className="membership-value">23</p>
+            <p className="membership-value">{daysLeft ?? "—"}</p>
             <p className="membership-label">Days Left</p>
           </div>
           <div>
@@ -49,7 +66,6 @@ export default function MembershipPanel() {
         >
           Renew Subscription
         </button>
-        <p className="membership-autorenew">Auto-renewal: December 31, 2025</p>
       </div>
     </div>
   );
