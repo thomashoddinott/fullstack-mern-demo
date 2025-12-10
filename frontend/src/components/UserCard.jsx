@@ -91,6 +91,35 @@ export default function UserCard() {
     }
   }
 
+  // Calculate subscription progress percentage
+  let progressPercent = 0;
+  try {
+    const today = new Date();
+    const expiryDate = user.subscription?.expiry ? new Date(user.subscription.expiry) : null;
+    let startDate = user.subscription?.start ? new Date(user.subscription.start) : null;
+
+    // If no explicit start date, fall back to the first day of the expiry month
+    if (!startDate && expiryDate) {
+      startDate = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), 1);
+    }
+
+    if (startDate && expiryDate) {
+      const total = expiryDate.getTime() - startDate.getTime();
+      const elapsed = today.getTime() - startDate.getTime();
+      if (total > 0) {
+        progressPercent = Math.round((elapsed / total) * 100);
+        if (progressPercent < 0) progressPercent = 0;
+        if (progressPercent > 100) progressPercent = 100;
+      }
+    }
+  } catch {
+    progressPercent = 0;
+  }
+
+  // Defensive clamp to guarantee percent stays within 0-100
+  let safePercent = Number.isFinite(progressPercent) ? progressPercent : 0;
+  safePercent = Math.max(0, Math.min(100, safePercent));
+
 
   return (
     <div className="user-card">
@@ -133,7 +162,13 @@ export default function UserCard() {
         </div>
         <p className="subscription-expiry">Expires: {formattedExpiry}</p>
         <div className="progress-bar">
-          <div className="progress-fill"></div>
+          <div
+            className={`progress-fill ${safePercent > 90 ? 'progress-fill--nearing-end' : ''}`}
+            style={{ width: `${safePercent}%` }}
+            aria-valuenow={safePercent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          ></div>
         </div>
       </div>
 
