@@ -135,7 +135,7 @@ db.users.insertMany([
     rank: "White Belt",
     status: "Inactive",
     subscription: {
-      plan_id: "Basic",
+      plan_id: "12m",
       expiry: "2025-12-31T00:00:00Z",
     },
     stats: {
