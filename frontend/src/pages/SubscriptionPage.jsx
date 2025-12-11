@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import "./SubscriptionPage.css";
+import SubscriptionCard from "../components/SubscriptionCard";
 
 export default function SubscriptionPage() {
   const { data: plans, isLoading: plansLoading, isError: plansError } = useQuery({
@@ -9,43 +10,16 @@ export default function SubscriptionPage() {
     queryFn: () => axios.get('/api/plans').then((res) => res.data),
   });
 
-  const currentMembership = {
-    title: "1 Month",
-    daysLeft: 23,
-    price: "$99",
-    billing: "Monthly",
-  };
-
   return (
     <div className="subscription-wrapper">
 
       {/* CURRENT MEMBERSHIP */}
-      <div className="current-card">
-        <div>
-          <h2 className="current-title">{currentMembership.title}</h2>
-          <p className="current-subtitle">Unlimited access to all classes and facilities</p>
-
-          <div className="current-stats">
-            <div>
-              <p className="stat-value">{currentMembership.daysLeft}</p>
-              <p className="stat-label">Days Left</p>
-            </div>
-            <div>
-              <p className="stat-value">{currentMembership.price}</p>
-              <p className="stat-label">{currentMembership.billing}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="current-actions">
-          <button
-            className="renew-btn"
-            onClick={() => alert("Renew Subscription Clicked")}
-          >
-            Renew Subscription
-          </button>
-        </div>
-      </div>
+      <SubscriptionCard
+        variant="secondary"
+        userId={0}
+        buttonText={"Pay now"}
+        onButtonClick={() => alert("Open billing portal (placeholder)")}
+      />
 
       {/* AVAILABLE PLANS */}
       <div>
