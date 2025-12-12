@@ -1,8 +1,10 @@
 // -- Add this at the top of the file --
 import { useState } from "react";
+import ContactForm from "../components/ContactForm";
 
 export default function AboutPage() {
   const [openIndex, setOpenIndex] = useState(null);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const faqs = [
     {
@@ -60,13 +62,16 @@ export default function AboutPage() {
           </p>
 
           <button
-            onClick={() => alert("takes to contact page")}
+            onClick={() => setContactOpen((v) => !v)}
             className="px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
           >
-            Learn More
+            Contact Us
           </button>
         </div>
       </div>
+
+      {/* Contact form (hidden until Contact Us is clicked) */}
+      <ContactForm visible={contactOpen} onClose={() => setContactOpen(false)} />
 
       {/* --- FAQ Section --- */}
       <div>
