@@ -1,9 +1,15 @@
 import express from "express";
 import multer from "multer";
 import { MongoClient, Binary } from "mongodb";
+import cors from "cors"; // is this necessary at this stage?
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config({ path: "../.env" });
 
 const app = express();
 app.use(express.json());
+app.use(cors()); // allow frontend requests
 
 // Multer memory storage for file uploads
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -128,6 +134,44 @@ app.get("/api/plans", async (req, res) => {
   } catch (err) {
     console.error("Error fetching plans:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/api/contact", async (req, res) => {
+  const { name, email, message } = req.body || {};
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    // Create transporter using SMTP credentials from env
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE || "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_TO,
+      subject: `Contact form submission from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      html: `<h3>New Contact Form Submission</h3>
+             <p><strong>Name:</strong> ${name}</p>
+             <p><strong>Email:</strong> ${email}</p>
+             <p><strong>Message:</strong></p>
+             <p>${message}</p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({ message: "Email sent successfully" });
+  } catch (err) {
+    console.error("Error sending contact email:", err);
+    return res.status(500).json({ error: "Failed to send email" });
   }
 });
 
