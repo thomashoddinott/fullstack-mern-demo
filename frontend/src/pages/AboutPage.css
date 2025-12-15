@@ -1,0 +1,25 @@
+@reference "../index.css";
+
+.about-wrapper {
+  @apply pt-20 px-6 max-w-6xl mx-auto space-y-20;
+}
+
+.about-grid {
+  @apply grid md:grid-cols-2 gap-12 items-center;
+}
+
+.about-image {
+  @apply rounded-xl shadow-md w-full object-cover;
+}
+
+.about-content {
+  @apply space-y-6;
+}
+
+.btn-contact {
+  @apply px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition;
+}
+
+.btn-trial {
+  @apply px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition;
+}
