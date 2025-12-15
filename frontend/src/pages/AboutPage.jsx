@@ -1,6 +1,7 @@
 // -- Add this at the top of the file --
 import { useState } from "react";
 import ContactForm from "../components/ContactForm";
+import "./AboutPage.css";
 
 export default function AboutPage() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -37,18 +38,17 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="pt-20 px-6 max-w-6xl mx-auto space-y-20">
+    <div className="about-wrapper">
       {/* --- Your original About section stays unchanged --- */}
-      <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="about-grid">
         <div className="w-full">
           <img
             src="https://sixbladesdenver.com/wp-content/uploads/2024/09/DSC01477-768x548-1.jpg"
             alt="BJJ training"
-            className="rounded-xl shadow-md w-full object-cover"
+            className="about-image"
           />
         </div>
-
-        <div className="space-y-6">
+        <div className="about-content">
           <h3 className="text-3xl font-bold text-gray-800">About Us</h3>
 
           <h3 className="text-3xl font-semibold text-gray-700 leading-snug">
@@ -73,7 +73,7 @@ export default function AboutPage() {
                 setContactCloseDelay(700);
                 setContactOpen((v) => !v);
               }}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
+              className="btn-contact"
             >
               Contact Us
             </button>
@@ -91,7 +91,7 @@ export default function AboutPage() {
                 setContactCloseDelay(5000);
                 setContactOpen((v) => !v);
               }}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+              className="btn-trial"
             >
               Book Trial Lesson
             </button>
