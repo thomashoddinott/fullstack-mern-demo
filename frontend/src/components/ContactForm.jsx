@@ -2,12 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
  
 
-export default function ContactForm({ visible = false, onClose = () => {} }) {
+export default function ContactForm({
+  visible = false,
+  onClose = () => {},
+  initialData = null,
+  successMessage = "Message sent — thanks!",
+  closeDelay = 700,
+}) {
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState(null); // 'success' | 'error' | null
+  const [statusType, setStatusType] = useState(null); // 'success' | 'error' | null
+  const [statusMessage, setStatusMessage] = useState(null);
   const closeTimeout = useRef(null);
 
   const [loading, setLoading] = useState(false);
@@ -15,43 +22,76 @@ export default function ContactForm({ visible = false, onClose = () => {} }) {
   useEffect(() => {
     if (!visible) {
       // clear transient state when collapsed
-      setStatus(null);
+      setStatusType(null);
+      setStatusMessage(null);
       setLoading(false);
+      // clear any initial values when closing
+      if (!initialData) {
+        setName("");
+        setSubject("");
+        setEmail("");
+        setMessage("");
+      }
+    } else if (visible && initialData) {
+      // prefill when opening with initialData
+      setName(initialData.name ?? "");
+      setSubject(initialData.subject ?? "");
+      setEmail(initialData.email ?? "");
+      setMessage(initialData.message ?? "");
     }
+
     return () => {
       if (closeTimeout.current) {
         clearTimeout(closeTimeout.current);
         closeTimeout.current = null;
       }
     };
-  }, [visible]);
+  }, [visible, initialData]);
+
+  // simple email validation
+  function isValidEmail(value) {
+    if (!value) return false;
+    // basic RFC-like check (not exhaustive)
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
 
   if (!visible) return null;
 
   const handleSend = () => {
     if (!name || !email || !message) {
-      setStatus("error");
+      setStatusType("error");
+      setStatusMessage("Please fill name, email and message.");
       return;
     }
 
-    setStatus(null);
+    if (!isValidEmail(email)) {
+      setStatusType("error");
+      setStatusMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setStatusType(null);
+    setStatusMessage(null);
     setLoading(true);
     axios.post("/api/contact", { name, subject, email, message })
       .then(() => {
-        setStatus("success");
+        setStatusType("success");
+        setStatusMessage(successMessage);
         setName("");
         setSubject("");
         setEmail("");
         setMessage("");
         // show success briefly then close the form
         closeTimeout.current = setTimeout(() => {
-          setStatus(null);
+          setStatusType(null);
+          setStatusMessage(null);
           onClose();
-        }, 700);
+        }, closeDelay);
       })
       .catch((err) => {
         console.error("Contact send error:", err);
-        setStatus("error");
+        setStatusType("error");
+        setStatusMessage("Failed to send — please try again later.");
       })
       .finally(() => setLoading(false));
   };
@@ -88,8 +128,19 @@ export default function ContactForm({ visible = false, onClose = () => {} }) {
           className="border rounded px-3 py-2 w-full md:col-span-2"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            // clear email-related messages while typing
+            if (statusType === "error" && statusMessage && statusMessage.toLowerCase().includes("email")) {
+              setStatusType(null);
+              setStatusMessage(null);
+            }
+          }}
         />
+
+        {!isValidEmail(email) && email.length > 0 && (
+          <p className="text-sm text-red-600 md:col-span-2">Please enter a valid email address.</p>
+        )}
 
         <textarea
           className="border rounded px-3 py-2 w-full md:col-span-2 h-32 resize-none"
@@ -116,12 +167,12 @@ export default function ContactForm({ visible = false, onClose = () => {} }) {
           Cancel
         </button>
 
-        {status === "success" && (
-          <p className="text-sm text-green-600 ml-3">Message sent — thanks!</p>
+        {statusType === "success" && (
+          <p className="text-sm text-green-600 ml-3">{statusMessage}</p>
         )}
 
-        {status === "error" && (
-          <p className="text-sm text-red-600 ml-3">Failed to send — please check fields and try again.</p>
+        {statusType === "error" && (
+          <p className="text-sm text-red-600 ml-3">{statusMessage}</p>
         )}
       </div>
     </div>

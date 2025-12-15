@@ -5,6 +5,9 @@ import ContactForm from "../components/ContactForm";
 export default function AboutPage() {
   const [openIndex, setOpenIndex] = useState(null);
   const [contactOpen, setContactOpen] = useState(false);
+  const [contactInitial, setContactInitial] = useState(null);
+  const [contactSuccessMessage, setContactSuccessMessage] = useState(null);
+  const [contactCloseDelay, setContactCloseDelay] = useState(undefined);
 
   const faqs = [
     {
@@ -61,17 +64,49 @@ export default function AboutPage() {
             skills.
           </p>
 
-          <button
-            onClick={() => setContactOpen((v) => !v)}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
-          >
-            Contact Us
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                // open contact form for a general message
+                setContactInitial(null);
+                setContactSuccessMessage("Message sent — thanks!");
+                setContactCloseDelay(700);
+                setContactOpen((v) => !v);
+              }}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
+            >
+              Contact Us
+            </button>
+
+            <button
+              onClick={() => {
+                // open contact form prefilled for trial lesson
+                setContactInitial({
+                  name: "",
+                  subject: "Trial lesson",
+                  email: "",
+                  message: "I'm interested in trying BJJ...",
+                });
+                setContactSuccessMessage("Someone will be in touch shortly");
+                setContactCloseDelay(5000);
+                setContactOpen((v) => !v);
+              }}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+            >
+              Book Trial Lesson
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Contact form (hidden until Contact Us is clicked) */}
-      <ContactForm visible={contactOpen} onClose={() => setContactOpen(false)} />
+      <ContactForm
+        visible={contactOpen}
+        onClose={() => setContactOpen(false)}
+        initialData={contactInitial}
+        successMessage={contactSuccessMessage}
+        closeDelay={contactCloseDelay}
+      />
 
       {/* --- FAQ Section --- */}
       <div>
