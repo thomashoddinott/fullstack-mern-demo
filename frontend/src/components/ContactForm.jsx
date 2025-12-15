@@ -1,3 +1,5 @@
+//refactor CSS?
+
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
  
@@ -101,7 +103,8 @@ export default function ContactForm({
     setSubject("");
     setEmail("");
     setMessage("");
-    setStatus(null);
+    setStatusType(null);
+    setStatusMessage(null);
     onClose();
   };
 
