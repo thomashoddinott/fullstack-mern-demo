@@ -1,0 +1,44 @@
+name: CI - Cypress E2E
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cypress-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Start preview server
+        run: |
+          cd frontend
+          # Start vite preview in background on port 5173
+          nohup npm run preview -- --port 5173 >/tmp/preview.log 2>&1 &
+          # Wait until the preview server responds
+          npx wait-on http://localhost:5173
+
+      - name: Run Cypress tests
+        env:
+          CI: true
+        run: |
+          cd frontend
+          npx cypress run --browser chrome --spec "cypress/e2e/contact.spec.cy.js"
