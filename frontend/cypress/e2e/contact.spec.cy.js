@@ -62,4 +62,35 @@ describe('Contact Us E2E', () => {
     cy.contains('Someone will be in touch shortly').should('be.visible')
   })
 
+  it('shows client validation errors when required fields are missing', () => {
+    cy.visit('http://localhost:5173/about')
+    cy.contains('button', 'Contact Us').click()
+
+    // Click send without filling fields
+    cy.contains('button', 'Send').click()
+
+    // Client-side validation message
+    cy.contains('Please fill name, email and message.').should('be.visible')
+  })
+
+  it('shows server error when POST /api/contact fails', () => {
+    // Force the contact endpoint to return a 500
+    cy.intercept('POST', '/api/contact', { statusCode: 500, body: { error: 'internal' } }).as('postContactFail')
+
+    cy.visit('http://localhost:5173/about')
+    cy.contains('button', 'Contact Us').click()
+
+    // Fill required fields
+    cy.get('input[placeholder="Name"]').type('Error Tester')
+    cy.get('input[placeholder="Email"]').type('error@example.com')
+    cy.get('textarea[placeholder="Message"]').type('This should trigger a server error')
+
+    // Submit
+    cy.contains('button', 'Send').click()
+
+    // Wait for intercepted request and assert error UI
+    cy.wait('@postContactFail')
+    cy.contains('Failed to send — please try again later.').should('be.visible')
+  })
+
 })
