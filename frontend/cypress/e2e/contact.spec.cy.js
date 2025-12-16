@@ -7,7 +7,7 @@ describe('Contact Us E2E', () => {
     }).as('postContact')
   })
 
-  it('submits Contact Us form and shows success then closes', () => {
+  it('submits Contact Us form and shows success then closes - TEST', () => {
     cy.visit('/about')
 
     // Open the contact form
