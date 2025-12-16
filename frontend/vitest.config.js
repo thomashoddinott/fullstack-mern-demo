@@ -9,5 +9,6 @@ export default defineConfig({
     setupFiles: './src/test/setup.js',
     css: true,
     pool: 'forks', // Add this
+    include: ['**/*.{test,spec}.{js,jsx,ts,tsx}'], // Add this
   },
 });
