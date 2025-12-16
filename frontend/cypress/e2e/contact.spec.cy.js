@@ -8,7 +8,7 @@ describe('Contact Us E2E', () => {
   })
 
   it('submits Contact Us form and shows success then closes', () => {
-    cy.visit('http://localhost:5173/about')
+    cy.visit('/about')
 
     // Open the contact form
     cy.contains('button', 'Contact Us').click()
