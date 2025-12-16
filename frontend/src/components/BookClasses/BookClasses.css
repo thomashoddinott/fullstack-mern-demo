@@ -1,4 +1,4 @@
-@reference "../index.css";
+@reference "../../index.css";
 
 .book-classes {
   @apply space-y-6;

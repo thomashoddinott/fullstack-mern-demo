@@ -1,10 +1,10 @@
 import "./BookClasses.css";
 import { useNavigate } from "react-router-dom";
-import ClassCard from "./ClassCard";
+import ClassCard from "../ClassCard";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-const formatClassTime = (start, end) => {
+export function formatClassTime(start, end) {
   const startDate = new Date(start);
   const endDate = new Date(end);
   const dateOptions = { month: "2-digit", day: "2-digit" };
@@ -13,7 +13,7 @@ const formatClassTime = (start, end) => {
   const formattedStartTime = startDate.toLocaleTimeString("en-US", timeOptions);
   const formattedEndTime = endDate.toLocaleTimeString("en-US", timeOptions);
   return `${formattedDate} | ${formattedStartTime} - ${formattedEndTime}`;
-};
+}
 
 export default function BookClasses() {
   const navigate = useNavigate();
