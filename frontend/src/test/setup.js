@@ -10,6 +10,24 @@ if (typeof global.TextEncoder === 'undefined') {
   global.TextDecoder = TextDecoder;
 }
 
+// Ensure a URL constructor is present for packages that require WHATWG URL
+if (typeof global.URL === 'undefined') {
+  try {
+    // Prefer node's built-in URL
+    const { URL } = require('url');
+    global.URL = URL;
+  } catch (err) {
+    // fallback: try whatwg-url if available
+    try {
+      // eslint-disable-next-line global-require
+      const { URL } = require('whatwg-url');
+      global.URL = URL;
+    } catch (e) {
+      // last resort: ignore — tests that need URL will fail clearly
+    }
+  }
+}
+
 expect.extend(matchers);
 
 afterEach(() => {
