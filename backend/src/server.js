@@ -14,7 +14,12 @@ app.use(cors()); // allow frontend requests
 // Multer memory storage for file uploads
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
-const MONGO_URI = "mongodb://localhost:27017";
+// --- MONGODB SETUP ---
+const MONGO_ENV = process.env.MONGO_ENV || "dev";
+let MONGO_URI = process.env.LOCAL_MONGO_URI;
+if (MONGO_ENV === "prod") {
+  MONGO_URI = process.env.PROD_MONGO_URI;
+}
 const client = new MongoClient(MONGO_URI);
 
 let db;
