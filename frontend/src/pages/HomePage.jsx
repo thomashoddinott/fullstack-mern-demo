@@ -1,6 +1,6 @@
 import UserCard from "../components/UserCard";
 import MembershipPanel from "../components/MembershipPanel";
-import BookClasses from "../components/BookClasses";
+import BookClasses from "../components/BookClasses/BookClasses";
 import UpcomingClasses from "../components/UpcomingClasses";
 
 export default function HomePage() {
