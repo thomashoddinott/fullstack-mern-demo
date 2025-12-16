@@ -363,6 +363,49 @@ app.put("/api/users/:id/booked-classes", async (req, res) => {
   }
 });
 
+// New route: extend subscription with plan in URL (e.g. /api/users/0/extend-subscription/3m)
+app.patch('/api/users/:id/extend-subscription/:plan', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid user id' });
+
+    const plan = req.params.plan;
+    const allowed = { '1m': 1, '3m': 3, '12m': 12 };
+    if (!plan || !Object.prototype.hasOwnProperty.call(allowed, plan)) {
+      return res.status(400).json({ message: 'Invalid plan. Allowed: 1m, 3m, 12m' });
+    }
+
+    const months = allowed[plan];
+    const daysToAdd = 31 * months; // use as approximation
+
+    const coll = db.collection('users');
+    const user = await coll.findOne({ id });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Determine base expiry: existing subscription expiry, or now
+    let baseExpiry = null;
+    if (user.subscription && user.subscription.expiry) {
+      const parsed = new Date(user.subscription.expiry);
+      if (!Number.isNaN(parsed.getTime())) baseExpiry = parsed;
+    }
+    if (!baseExpiry) baseExpiry = new Date();
+
+    const newExpiry = new Date(baseExpiry.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+    // Update the user's subscription.expiry and plan_id (ISO string)
+    await coll.updateOne(
+      { id },
+      { $set: { 'subscription.expiry': newExpiry.toISOString(), 'subscription.plan_id': plan } }
+    );
+
+    const updated = await coll.findOne({ id }, { projection: { subscription: 1, _id: 0 } });
+    return res.json({ subscription: updated.subscription });
+  } catch (err) {
+    console.error('Error extending subscription expiry:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });
