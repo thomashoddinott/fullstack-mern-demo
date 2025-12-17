@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import "./SubscriptionPage.css";
 import SubscriptionCard from "../components/SubscriptionCard";
 
@@ -10,16 +10,49 @@ export default function SubscriptionPage() {
     queryFn: () => axios.get('/api/plans').then((res) => res.data),
   });
 
+  const qc = useQueryClient();
+  // Fetch user and plan via useQuery so handler can rely on cached data.
+  const userQuery = useQuery({
+    queryKey: ['user', 0],
+    queryFn: () => axios.get('/api/users/0').then((r) => r.data),
+    staleTime: 1000 * 60 * 1,
+  });
+
+  // Handler uses the cached queries rather than refetching inside the function.
+  const handleExtend = async () => {
+    // Use the existing subscription.plan_id to renew the same plan
+    try {
+      const currentPlanId = userQuery.data?.subscription?.plan_id;
+      if (!currentPlanId) {
+        alert('No current plan found for user');
+        return;
+      }
+
+      const userId = userQuery.data?.id ?? 0;
+      await axios.patch(`/api/users/${userId}/extend-subscription/${currentPlanId}`);
+      // refresh cached user data
+      qc.invalidateQueries(['user', userId]);
+      alert('Subscription extended');
+    } catch (err) {
+      console.error('Extend failed', err);
+      alert('Failed to extend subscription');
+    }
+  };
+
   return (
     <div className="subscription-wrapper">
 
       {/* CURRENT MEMBERSHIP */}
-      <SubscriptionCard
-        variant="secondary"
-        userId={0}
-        buttonText={"Pay now"}
-        onButtonClick={() => alert("Open billing portal (placeholder)")}
-      />
+      <div>
+        <h2 className="plans-title">Current Plan</h2>
+
+        <SubscriptionCard
+          variant="secondary"
+          userId={0}
+          buttonText={"Pay now"}
+          onButtonClick={handleExtend}
+        />
+      </div>
 
       {/* AVAILABLE PLANS */}
       <div>
