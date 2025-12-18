@@ -143,15 +143,15 @@ export default function UserCard() {
       <p className="user-rank">{user.rank}</p>
       <span
         className={`user-status ${
-          user.status === "Inactive" ? "user-status--inactive" : ""
+          user.subscription.status === "Inactive" ? "user-status--inactive" : ""
         }`}
       >
         <span
           className={`status-dot ${
-            user.status === "Inactive" ? "status-dot--inactive" : ""
+            user.subscription.status === "Inactive" ? "status-dot--inactive" : ""
           }`}
         ></span>
-        {user.status}
+        {user.subscription.status}
       </span>
 
       <div className="subscription-card">

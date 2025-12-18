@@ -101,8 +101,8 @@ db.users.insertMany([
     id: 0,
     name: "John Doe",
     rank: "Blue Belt",
-    status: "Active",
     subscription: {
+      status: "Active",
       plan_id: "1m",
       expiry: "2025-12-31T00:00:00Z",
       start: "2025-12-01T00:00:00Z",
@@ -118,8 +118,8 @@ db.users.insertMany([
     id: 1,
     name: "Jane Smith",
     rank: "Purple Belt",
-    status: "Active",
     subscription: {
+      status: "Active",
       plan_id: "3m",
       expiry: "2025-12-31T00:00:00Z",
       start: "2025-12-01T00:00:00Z",
@@ -135,8 +135,8 @@ db.users.insertMany([
     id: 2,
     name: "Peter Jones",
     rank: "White Belt",
-    status: "Inactive",
     subscription: {
+      status: "Inactive",
       plan_id: "12m",
       expiry: "2025-12-31T00:00:00Z",
       start: "2025-12-01T00:00:00Z",
