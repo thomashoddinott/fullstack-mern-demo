@@ -32,23 +32,41 @@ app.get("/hello", (req, res) => {
   res.send("Hello!");
 });
 
-// GET user by dynamic ID
 app.get("/api/users/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id); // convert :id to a number
+    const id = Number(req.params.id);
 
-    const user = await db.collection("users").findOne({ id });
+    const user = await db.collection("users").aggregate([
+      { $match: { id } },
+      {
+        $addFields: {
+          "subscription.status": {
+            $cond: {
+              if: { 
+                $gte: [
+                  { $dateFromString: { dateString: "$subscription.expiry" } },
+                  new Date()
+                ]
+              },
+              then: "Active",
+              else: "Inactive"
+            }
+          }
+        }
+      }
+    ]).toArray();
 
-    if (!user) {
+    if (!user || user.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(user);
+    res.json(user[0]);
   } catch (err) {
     console.error("Error fetching user:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 // GET user avatar by userId
 app.get("/api/users/:id/avatar", async (req, res) => {
   try {
