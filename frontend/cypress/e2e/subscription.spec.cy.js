@@ -10,7 +10,7 @@ describe('Subscription renewal', () => {
       id: 0,
       name: 'Test User',
       subscription: {
-        plan_id: 'basic',
+        plan_id: '1m',
         expiry: initialExpiry,
       },
     }
@@ -18,7 +18,7 @@ describe('Subscription renewal', () => {
 
     // Plan data (if page fetches it)
     const plan = {
-      id: 'basic',
+      id: '1m',
       label: '1 month'
     }
 
