@@ -416,25 +416,28 @@ app.patch('/api/users/:id/extend-subscription/:plan', async (req, res) => {
     const user = await coll.findOne({ id });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Determine base expiry: existing subscription expiry, or now
-    let baseExpiry = null;
-    if (user.subscription && user.subscription.expiry) {
-      const parsed = new Date(user.subscription.expiry);
-      if (!Number.isNaN(parsed.getTime())) baseExpiry = parsed;
-    }
-    if (!baseExpiry) baseExpiry = new Date();
-
-    const newExpiry = new Date(baseExpiry.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-
-    // Determine whether the current subscription is inactive (expiry in the past or missing)
+    // Compute parsed expiry (if present) and now
     const now = new Date();
-    let isInactive = true;
+    let parsedExpiry = null;
     if (user.subscription && user.subscription.expiry) {
-      const parsedExpiry = new Date(user.subscription.expiry);
-      if (!Number.isNaN(parsedExpiry.getTime())) {
+      const p = new Date(user.subscription.expiry);
+      if (!Number.isNaN(p.getTime())) parsedExpiry = p;
+    }
+
+    // Determine whether the subscription is inactive. Prefer an explicit stored status
+    // when available; otherwise fall back to expiry comparison (missing expiry => inactive).
+    let isInactive = user.subscription?.status === 'Inactive';
+    if (!isInactive) {
+      if (parsedExpiry) {
         isInactive = parsedExpiry.getTime() < now.getTime();
+      } else {
+        isInactive = true;
       }
     }
+
+    // If the subscription is inactive, start from `now`; otherwise extend from the parsed expiry.
+    const baseExpiry = isInactive ? now : (parsedExpiry ?? now);
+    const newExpiry = new Date(baseExpiry.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
 
     // Prepare update fields; if the subscription was inactive, reset the start date to today
     const updateFields = {
