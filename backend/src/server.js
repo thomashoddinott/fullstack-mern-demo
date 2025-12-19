@@ -444,6 +444,7 @@ app.patch('/api/users/:id/extend-subscription/:plan', async (req, res) => {
     if (isInactive) {
       updateFields['subscription.start'] = now.toISOString();
     }
+    updateFields['subscription.status'] = 'Active';
 
     // Update the user's subscription fields
     await coll.updateOne(
