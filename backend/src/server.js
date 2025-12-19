@@ -410,10 +410,29 @@ app.patch('/api/users/:id/extend-subscription/:plan', async (req, res) => {
 
     const newExpiry = new Date(baseExpiry.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
 
-    // Update the user's subscription.expiry and plan_id (ISO string)
+    // Determine whether the current subscription is inactive (expiry in the past or missing)
+    const now = new Date();
+    let isInactive = true;
+    if (user.subscription && user.subscription.expiry) {
+      const parsedExpiry = new Date(user.subscription.expiry);
+      if (!Number.isNaN(parsedExpiry.getTime())) {
+        isInactive = parsedExpiry.getTime() < now.getTime();
+      }
+    }
+
+    // Prepare update fields; if the subscription was inactive, reset the start date to today
+    const updateFields = {
+      'subscription.expiry': newExpiry.toISOString(),
+      'subscription.plan_id': plan,
+    };
+    if (isInactive) {
+      updateFields['subscription.start'] = now.toISOString();
+    }
+
+    // Update the user's subscription fields
     await coll.updateOne(
       { id },
-      { $set: { 'subscription.expiry': newExpiry.toISOString(), 'subscription.plan_id': plan } }
+      { $set: updateFields }
     );
 
     const updated = await coll.findOne({ id }, { projection: { subscription: 1, _id: 0 } });
