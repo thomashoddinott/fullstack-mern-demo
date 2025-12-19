@@ -90,6 +90,7 @@ export default function UserCard() {
       });
     }
   }
+  const isSubscriptionInactive = user.subscription?.status === "Inactive";
   // Compute subscription progress percentage (0-100)
   function computeSubscriptionProgress(subscription) {
     try {
@@ -159,7 +160,9 @@ export default function UserCard() {
           <p>Subscription</p>
           <span className="subscription-badge">{planData?.label ?? user.subscription?.plan_id ?? "—"}</span>
         </div>
-        <p className="subscription-expiry">Expires: {formattedExpiry}</p>
+        <p className={`subscription-expiry ${isSubscriptionInactive ? 'subscription-expiry--expired' : ''}`}>
+          {isSubscriptionInactive ? 'Expired:' : 'Expires:'} {formattedExpiry}
+        </p>
         <div className="progress-bar">
           <div
             className={`progress-fill ${subscriptionProgress > 90 ? 'progress-fill--nearing-end' : ''}`}

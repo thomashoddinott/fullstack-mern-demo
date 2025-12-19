@@ -104,7 +104,7 @@ db.users.insertMany([
     subscription: {
       status: "Active",
       plan_id: "1m",
-      expiry: "2025-12-19T00:00:00Z",
+      expiry: "2025-12-17T00:00:00Z",
       start: "2025-12-01T00:00:00Z",
     },
     stats: {

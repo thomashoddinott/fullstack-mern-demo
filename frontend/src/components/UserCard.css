@@ -73,6 +73,11 @@
   @apply text-xs text-gray-500 mb-2;
 }
 
+/* Expired label styling */
+.subscription-expiry--expired {
+  @apply text-red-600 font-semibold;
+}
+
 .progress-bar {
   @apply w-full h-2 bg-gray-200 rounded-full;
 }
