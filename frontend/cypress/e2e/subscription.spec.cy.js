@@ -52,9 +52,11 @@ describe('Subscription renewal', () => {
     cy.contains('.subscription-label-ui', /Days Left/i).should('exist')
 
     // Extract the initial days left number by finding the sibling value element.
+    // Wait for the Days Left value to be a valid number (not "—")
     cy.contains('.subscription-label-ui', /Days Left/i)
       .parent()
       .find('.subscription-value-ui')
+      .should('not.contain', '—')
       .invoke('text')
       .then((text) => {
         const initialDays = parseInt(text.trim(), 10)
