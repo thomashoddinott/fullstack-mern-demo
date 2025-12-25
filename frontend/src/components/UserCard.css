@@ -73,12 +73,22 @@
   @apply text-xs text-gray-500 mb-2;
 }
 
+/* Expired label styling */
+.subscription-expiry--expired {
+  @apply text-red-600 font-semibold;
+}
+
 .progress-bar {
   @apply w-full h-2 bg-gray-200 rounded-full;
 }
 
 .progress-fill {
-  @apply h-2 bg-red-500 rounded-full w-3/4;
+  @apply h-2 bg-green-500 rounded-full;
+}
+
+/* State when subscription is nearing end */
+.progress-fill--nearing-end {
+  @apply bg-red-500;
 }
 
 /* Quick stats */

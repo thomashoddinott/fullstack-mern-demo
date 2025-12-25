@@ -32,23 +32,41 @@ app.get("/hello", (req, res) => {
   res.send("Hello!");
 });
 
-// GET user by dynamic ID
 app.get("/api/users/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id); // convert :id to a number
+    const id = Number(req.params.id);
 
-    const user = await db.collection("users").findOne({ id });
+    const user = await db.collection("users").aggregate([
+      { $match: { id } },
+      {
+        $addFields: {
+          "subscription.status": {
+            $cond: {
+              if: { 
+                $gte: [
+                  { $dateFromString: { dateString: "$subscription.expiry" } },
+                  new Date()
+                ]
+              },
+              then: "Active",
+              else: "Inactive"
+            }
+          }
+        }
+      }
+    ]).toArray();
 
-    if (!user) {
+    if (!user || user.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(user);
+    res.json(user[0]);
   } catch (err) {
     console.error("Error fetching user:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 // GET user avatar by userId
 app.get("/api/users/:id/avatar", async (req, res) => {
   try {
@@ -172,6 +190,27 @@ app.post("/api/contact", async (req, res) => {
   } catch (err) {
     console.error("Error sending contact email:", err);
     return res.status(500).json({ error: "Failed to send email" });
+  }
+});
+
+// GET plan by plan id (returns single plan)
+app.get("/api/plans/:planId", async (req, res) => {
+  try {
+    const planId = req.params.planId;
+    if (!planId) return res.status(400).json({ message: "Missing plan id" });
+
+    // Support finding by either `id` (seeded) or `plan_id` (if used elsewhere)
+    const plan = await db
+      .collection("plans")
+      .findOne({ $or: [{ id: planId }, { plan_id: planId }] });
+
+    if (!plan) return res.status(404).json({ message: "Plan not found" });
+
+    // Return the plan object (caller can read `.label`)
+    res.json(plan);
+  } catch (err) {
+    console.error("Error fetching plan:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -323,12 +362,28 @@ app.put("/api/users/:id/booked-classes", async (req, res) => {
     const user = await coll.findOne({ id });
     if (!user) return res.status(404).json({ message: "User not found" });
 
+      // Use the stored subscription status on the user object rather than recalculating
+      const isInactive = user.subscription?.status === 'Inactive';
+
     if (Array.isArray(booked_classes_id)) {
+      // If this replacement introduces any new class ids compared to existing booked list,
+      // treat that as booking activity and block it when the user's subscription is inactive.
+      const existing = user.booked_classes_id ?? [];
+      const additions = booked_classes_id.filter((cid) => !existing.includes(cid));
+      if (additions.length > 0 && isInactive) {
+        return res.status(403).json({ message: 'Cannot book classes - subscription inactive' });
+      }
+
       // Replace the array
       await coll.updateOne({ id }, { $set: { booked_classes_id } });
     } else if (action === "remove" && typeof classId !== "undefined") {
       await coll.updateOne({ id }, { $pull: { booked_classes_id: classId } });
     } else if (action === "add" && typeof classId !== "undefined") {
+      // Block explicit add attempts when subscription is inactive
+      if (isInactive) {
+        return res.status(403).json({ message: 'Cannot book classes - subscription inactive' });
+      }
+
       await coll.updateOne({ id }, { $addToSet: { booked_classes_id: classId } });
     } else {
       return res.status(400).json({ message: "Invalid body. Provide booked_classes_id array or action + classId." });
@@ -339,6 +394,72 @@ app.put("/api/users/:id/booked-classes", async (req, res) => {
   } catch (err) {
     console.error("Error updating booked_classes_id:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// New route: extend subscription with plan in URL (e.g. /api/users/0/extend-subscription/3m)
+app.patch('/api/users/:id/extend-subscription/:plan', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid user id' });
+
+    const plan = req.params.plan;
+    const allowed = { '1m': 1, '3m': 3, '12m': 12 };
+    if (!plan || !Object.prototype.hasOwnProperty.call(allowed, plan)) {
+      return res.status(400).json({ message: 'Invalid plan. Allowed: 1m, 3m, 12m' });
+    }
+
+    const months = allowed[plan];
+    const daysToAdd = 31 * months; // use as approximation
+
+    const coll = db.collection('users');
+    const user = await coll.findOne({ id });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Compute parsed expiry (if present) and now
+    const now = new Date();
+    let parsedExpiry = null;
+    if (user.subscription && user.subscription.expiry) {
+      const p = new Date(user.subscription.expiry);
+      if (!Number.isNaN(p.getTime())) parsedExpiry = p;
+    }
+
+    // Determine whether the subscription is inactive. Prefer an explicit stored status
+    // when available; otherwise fall back to expiry comparison (missing expiry => inactive).
+    let isInactive = user.subscription?.status === 'Inactive';
+    if (!isInactive) {
+      if (parsedExpiry) {
+        isInactive = parsedExpiry.getTime() < now.getTime();
+      } else {
+        isInactive = true;
+      }
+    }
+
+    // If the subscription is inactive, start from `now`; otherwise extend from the parsed expiry.
+    const baseExpiry = isInactive ? now : (parsedExpiry ?? now);
+    const newExpiry = new Date(baseExpiry.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+    // Prepare update fields; if the subscription was inactive, reset the start date to today
+    const updateFields = {
+      'subscription.expiry': newExpiry.toISOString(),
+      'subscription.plan_id': plan,
+    };
+    if (isInactive) {
+      updateFields['subscription.start'] = now.toISOString();
+    }
+    updateFields['subscription.status'] = 'Active';
+
+    // Update the user's subscription fields
+    await coll.updateOne(
+      { id },
+      { $set: updateFields }
+    );
+
+    const updated = await coll.findOne({ id }, { projection: { subscription: 1, _id: 0 } });
+    return res.json({ subscription: updated.subscription });
+  } catch (err) {
+    console.error('Error extending subscription expiry:', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 

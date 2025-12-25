@@ -51,5 +51,5 @@ jobs:
           CI: true
         run: |
           cd frontend
-          npx cypress run --browser chrome --headless \
-            --spec "cypress/e2e/contact.spec.cy.js"
+          # Run the full E2E suite under cypress/e2e
+          npx cypress run --browser chrome --headless

@@ -101,10 +101,11 @@ db.users.insertMany([
     id: 0,
     name: "John Doe",
     rank: "Blue Belt",
-    status: "Active",
     subscription: {
-      type: "Premium",
-      expiry: "2024-03-15T00:00:00Z",
+      status: "Inactive",
+      plan_id: "1m",
+      expiry: "2025-12-01T00:00:00Z",
+      start: "2025-12-01T00:00:00Z",
     },
     stats: {
       classes_this_month: 12,
@@ -117,10 +118,11 @@ db.users.insertMany([
     id: 1,
     name: "Jane Smith",
     rank: "Purple Belt",
-    status: "Active",
     subscription: {
-      type: "Gold",
-      expiry: "2025-06-01T00:00:00Z",
+      status: "Active",
+      plan_id: "3m",
+      expiry: "2025-12-31T00:00:00Z",
+      start: "2025-12-01T00:00:00Z",
     },
     stats: {
       classes_this_month: 8,
@@ -133,10 +135,11 @@ db.users.insertMany([
     id: 2,
     name: "Peter Jones",
     rank: "White Belt",
-    status: "Inactive",
     subscription: {
-      type: "Basic",
-      expiry: "2023-12-31T00:00:00Z",
+      status: "Inactive",
+      plan_id: "12m",
+      expiry: "2025-12-31T00:00:00Z",
+      start: "2025-12-01T00:00:00Z",
     },
     stats: {
       classes_this_month: 0,

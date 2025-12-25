@@ -1,7 +1,8 @@
 import React from 'react';
 import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import "./SubscriptionPage.css";
+import SubscriptionCard from "../components/SubscriptionCard";
 
 export default function SubscriptionPage() {
   const { data: plans, isLoading: plansLoading, isError: plansError } = useQuery({
@@ -9,47 +10,48 @@ export default function SubscriptionPage() {
     queryFn: () => axios.get('/api/plans').then((res) => res.data),
   });
 
-  const currentMembership = {
-    title: "1 Month",
-    subtitle: "Unlimited access to all classes and facilities",
-    daysLeft: 23,
-    price: "$99",
-    billing: "Monthly",
-    autoRenew: "March 15, 2024",
+  const qc = useQueryClient();
+  // Fetch user and plan via useQuery so handler can rely on cached data.
+  const userQuery = useQuery({
+    queryKey: ['user', 0],
+    queryFn: () => axios.get('/api/users/0').then((r) => r.data),
+    staleTime: 1000 * 60 * 1,
+  });
+
+  // Handler uses the cached queries rather than refetching inside the function.
+  const handleExtend = async () => {
+    // Use the existing subscription.plan_id to renew the same plan
+    try {
+      const currentPlanId = userQuery.data?.subscription?.plan_id;
+      if (!currentPlanId) {
+        alert('No current plan found for user');
+        return;
+      }
+
+      const userId = userQuery.data?.id ?? 0;
+      await axios.patch(`/api/users/${userId}/extend-subscription/${currentPlanId}`);
+      // refresh cached user data
+      qc.invalidateQueries(['user', userId]);
+      alert('Subscription extended');
+    } catch (err) {
+      console.error('Extend failed', err);
+      alert('Failed to extend subscription');
+    }
   };
 
   return (
     <div className="subscription-wrapper">
 
       {/* CURRENT MEMBERSHIP */}
-      <div className="current-card">
-        <div>
-          <h2 className="current-title">{currentMembership.title}</h2>
-          <p className="current-subtitle">{currentMembership.subtitle}</p>
+      <div>
+        <h2 className="plans-title">Current Plan</h2>
 
-          <div className="current-stats">
-            <div>
-              <p className="stat-value">{currentMembership.daysLeft}</p>
-              <p className="stat-label">Days Left</p>
-            </div>
-            <div>
-              <p className="stat-value">{currentMembership.price}</p>
-              <p className="stat-label">{currentMembership.billing}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="current-actions">
-          <button
-            className="renew-btn"
-            onClick={() => alert("Renew Subscription Clicked")}
-          >
-            Renew Subscription
-          </button>
-          <p className="autorenew-text">
-            Auto-renewal: {currentMembership.autoRenew}
-          </p>
-        </div>
+        <SubscriptionCard
+          variant="secondary"
+          userId={0}
+          buttonText={"Pay now"}
+          onButtonClick={handleExtend}
+        />
       </div>
 
       {/* AVAILABLE PLANS */}

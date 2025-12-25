@@ -11,6 +11,7 @@ export default function ClassCard({
   spots,
   disabled = false, // I think this needs refactoring, disabled initially meant "already booked"
   isFull = false,
+  subscriptionInactive = false,
 }) {
   const style = getClassStyle(title);
   const queryClient = useQueryClient();
@@ -75,17 +76,19 @@ export default function ClassCard({
       <div className="class-card-footer">
         <button
           className={`class-card-button ${style.color} ${
-            (disabled || isFull) ? "class-card-button--disabled" : ""
+            (disabled || isFull || subscriptionInactive) ? "class-card-button--disabled" : ""
           }`}
           onClick={() => {
-            if (disabled || isFull || addBookingMutation.isLoading) return;
+            if (disabled || isFull || subscriptionInactive || addBookingMutation.isLoading) return;
             if (!id) return;
             addBookingMutation.mutate(id);
           }}
-          disabled={disabled || isFull || addBookingMutation.isLoading}
+          disabled={disabled || isFull || subscriptionInactive || addBookingMutation.isLoading}
         >
           {isFull
             ? "Class Full"
+            : subscriptionInactive
+            ? "Inactive Subscription"
             : disabled
             ? "Already Booked"
             : addBookingMutation.isLoading

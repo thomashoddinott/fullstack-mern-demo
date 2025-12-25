@@ -39,6 +39,14 @@ export default function BookClasses() {
   });
   const bookedIds = bookedResp?.booked_classes_id ?? [];
 
+  // fetch the current user so we can check subscription status and block booking when Inactive
+  const { data: user } = useQuery({
+    queryKey: ["user", 0],
+    queryFn: () => axios.get(`/api/users/0`).then((r) => r.data),
+    staleTime: 1000 * 60 * 1,
+  });
+  const isSubscriptionInactive = user?.subscription?.status === 'Inactive';
+
   const teacherMap = (teachers || []).reduce((acc, t) => {
     acc[t.id] = t;
     return acc;
@@ -106,7 +114,9 @@ export default function BookClasses() {
                 teacher={teacher}
                 datetime={datetime}
                 spots={spots}
-                disabled={bookedIds.includes(classItem.id ?? classItem._id) || isFull}
+                // Also disable booking when the user's subscription is Inactive
+                disabled={bookedIds.includes(classItem.id ?? classItem._id) || isFull || isSubscriptionInactive}
+                subscriptionInactive={isSubscriptionInactive}
                 isFull={isFull}
               />
             );

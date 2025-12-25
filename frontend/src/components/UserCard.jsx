@@ -28,6 +28,15 @@ export default function UserCard() {
     enabled: !!user, // only fetch avatar once user exists
   });
 
+  // Fetch plan label for display (map plan_id -> label)
+  const planId = user?.subscription?.plan_id;
+  const { data: planData } = useQuery({
+    queryKey: ["plan", planId],
+    queryFn: () => axios.get(`/api/plans/${planId}`).then((r) => r.data),
+    enabled: !!planId,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -81,6 +90,36 @@ export default function UserCard() {
       });
     }
   }
+  const isSubscriptionInactive = user.subscription?.status === "Inactive";
+  // Compute subscription progress percentage (0-100)
+  function computeSubscriptionProgress(subscription) {
+    try {
+      const today = new Date();
+      const expiryDate = subscription?.expiry ? new Date(subscription.expiry) : null;
+      let startDate = subscription?.start ? new Date(subscription.start) : null;
+
+      // If no explicit start date, fall back to the first day of the expiry month
+      if (!startDate && expiryDate) {
+        startDate = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), 1);
+      }
+
+      if (startDate && expiryDate) {
+        const total = expiryDate.getTime() - startDate.getTime();
+        const elapsed = today.getTime() - startDate.getTime();
+        if (total > 0) {
+          let pct = Math.round((elapsed / total) * 100);
+          if (!Number.isFinite(pct)) pct = 0;
+          return Math.max(0, Math.min(100, pct));
+        }
+      }
+    } catch {
+      // fall through
+    }
+    return 0;
+  }
+
+  const subscriptionProgress = computeSubscriptionProgress(user.subscription);
+
 
   return (
     <div className="user-card">
@@ -105,25 +144,33 @@ export default function UserCard() {
       <p className="user-rank">{user.rank}</p>
       <span
         className={`user-status ${
-          user.status === "Inactive" ? "user-status--inactive" : ""
+          user.subscription.status === "Inactive" ? "user-status--inactive" : ""
         }`}
       >
         <span
           className={`status-dot ${
-            user.status === "Inactive" ? "status-dot--inactive" : ""
+            user.subscription.status === "Inactive" ? "status-dot--inactive" : ""
           }`}
         ></span>
-        {user.status}
+        {user.subscription.status}
       </span>
 
       <div className="subscription-card">
         <div className="subscription-header">
           <p>Subscription</p>
-          <span className="subscription-badge">{user.subscription.type}</span>
+          <span className="subscription-badge">{planData?.label ?? user.subscription?.plan_id ?? "—"}</span>
         </div>
-        <p className="subscription-expiry">Expires: {formattedExpiry}</p>
+        <p className={`subscription-expiry ${isSubscriptionInactive ? 'subscription-expiry--expired' : ''}`}>
+          {isSubscriptionInactive ? 'Expired:' : 'Expires:'} {formattedExpiry}
+        </p>
         <div className="progress-bar">
-          <div className="progress-fill"></div>
+          <div
+            className={`progress-fill ${subscriptionProgress > 90 ? 'progress-fill--nearing-end' : ''}`}
+            style={{ width: `${subscriptionProgress}%` }}
+            aria-valuenow={subscriptionProgress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          ></div>
         </div>
       </div>
 
