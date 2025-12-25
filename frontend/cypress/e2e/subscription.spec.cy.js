@@ -67,9 +67,11 @@ describe('Subscription renewal', () => {
         cy.wait('@getUser')
 
         // After the server responds and the query refetch completes, the UI should update.
+        // Wait for the Days Left value to be a valid number (not "—")
         cy.contains('.subscription-label-ui', /Days Left/i)
           .parent()
           .find('.subscription-value-ui')
+          .should('not.contain', '—')
           .invoke('text')
           .then((updatedText) => {
             const updatedDays = parseInt(updatedText.trim(), 10)
