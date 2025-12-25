@@ -1,7 +1,7 @@
-import bjjGiLogo from "../assets/class-logos/BJJ - Gi.png";
-import bjjNoGiLogo from "../assets/class-logos/BJJ - No-Gi.png";
-import yogaFlowLogo from "../assets/class-logos/Yoga Flow.png";
-import strengthLogo from "../assets/class-logos/Strength & Conditioning.png";
+import bjjGiLogo from "../assets/class-logos/BJJ - Gi.png"
+import bjjNoGiLogo from "../assets/class-logos/BJJ - No-Gi.png"
+import yogaFlowLogo from "../assets/class-logos/Yoga Flow.png"
+import strengthLogo from "../assets/class-logos/Strength & Conditioning.png"
 
 const classStyles = {
   "BJJ - Gi": {
@@ -25,28 +25,28 @@ const classStyles = {
     hexColor: "#F97316",
     logo: strengthLogo,
   },
-};
+}
 
 function normalize(str) {
   return String(str)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+    .trim()
 }
 
 function getClassStyle(title) {
-  if (!title) return { color: "bg-gray-400", logo: "" };
+  if (!title) return { color: "bg-gray-400", logo: "" }
   // try exact
-  if (classStyles[title]) return classStyles[title];
+  if (classStyles[title]) return classStyles[title]
 
-  const t = normalize(title);
+  const t = normalize(title)
   // try to find key that is contained in title or vice versa
   for (const key of Object.keys(classStyles)) {
-    const k = normalize(key);
-    if (t.includes(k) || k.includes(t)) return classStyles[key];
+    const k = normalize(key)
+    if (t.includes(k) || k.includes(t)) return classStyles[key]
   }
 
-  return { color: "bg-gray-400", logo: "" };
+  return { color: "bg-gray-400", logo: "" }
 }
 
-export { classStyles, getClassStyle };
+export { classStyles, getClassStyle }

@@ -1,7 +1,7 @@
-import UserCard from "../components/UserCard";
-import MembershipPanel from "../components/MembershipPanel";
-import BookClasses from "../components/BookClasses/BookClasses";
-import UpcomingClasses from "../components/UpcomingClasses";
+import UserCard from "../components/UserCard"
+import MembershipPanel from "../components/MembershipPanel"
+import BookClasses from "../components/BookClasses/BookClasses"
+import UpcomingClasses from "../components/UpcomingClasses"
 
 export default function HomePage() {
   return (
@@ -18,5 +18,5 @@ export default function HomePage() {
         <UpcomingClasses />
       </main>
     </div>
-  );
+  )
 }

@@ -1,8 +1,7 @@
 //refactor CSS?
 
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
- 
+import React, { useState, useEffect, useRef } from "react"
+import axios from "axios"
 
 export default function ContactForm({
   visible = false,
@@ -11,102 +10,103 @@ export default function ContactForm({
   successMessage = "Message sent — thanks!",
   closeDelay = 700,
 }) {
-  const [name, setName] = useState("");
-  const [subject, setSubject] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [statusType, setStatusType] = useState(null); // 'success' | 'error' | null
-  const [statusMessage, setStatusMessage] = useState(null);
-  const closeTimeout = useRef(null);
+  const [name, setName] = useState("")
+  const [subject, setSubject] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [statusType, setStatusType] = useState(null) // 'success' | 'error' | null
+  const [statusMessage, setStatusMessage] = useState(null)
+  const closeTimeout = useRef(null)
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!visible) {
       // clear transient state when collapsed
-      setStatusType(null);
-      setStatusMessage(null);
-      setLoading(false);
+      setStatusType(null)
+      setStatusMessage(null)
+      setLoading(false)
       // clear any initial values when closing
       if (!initialData) {
-        setName("");
-        setSubject("");
-        setEmail("");
-        setMessage("");
+        setName("")
+        setSubject("")
+        setEmail("")
+        setMessage("")
       }
     } else if (visible && initialData) {
       // prefill when opening with initialData
-      setName(initialData.name ?? "");
-      setSubject(initialData.subject ?? "");
-      setEmail(initialData.email ?? "");
-      setMessage(initialData.message ?? "");
+      setName(initialData.name ?? "")
+      setSubject(initialData.subject ?? "")
+      setEmail(initialData.email ?? "")
+      setMessage(initialData.message ?? "")
     }
 
     return () => {
       if (closeTimeout.current) {
-        clearTimeout(closeTimeout.current);
-        closeTimeout.current = null;
+        clearTimeout(closeTimeout.current)
+        closeTimeout.current = null
       }
-    };
-  }, [visible, initialData]);
+    }
+  }, [visible, initialData])
 
   // simple email validation
   function isValidEmail(value) {
-    if (!value) return false;
+    if (!value) return false
     // basic RFC-like check (not exhaustive)
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
   }
 
-  if (!visible) return null;
+  if (!visible) return null
 
   const handleSend = () => {
     if (!name || !email || !message) {
-      setStatusType("error");
-      setStatusMessage("Please fill name, email and message.");
-      return;
+      setStatusType("error")
+      setStatusMessage("Please fill name, email and message.")
+      return
     }
 
     if (!isValidEmail(email)) {
-      setStatusType("error");
-      setStatusMessage("Please enter a valid email address.");
-      return;
+      setStatusType("error")
+      setStatusMessage("Please enter a valid email address.")
+      return
     }
 
-    setStatusType(null);
-    setStatusMessage(null);
-    setLoading(true);
-    axios.post("/api/contact", { name, subject, email, message })
+    setStatusType(null)
+    setStatusMessage(null)
+    setLoading(true)
+    axios
+      .post("/api/contact", { name, subject, email, message })
       .then(() => {
-        setStatusType("success");
-        setStatusMessage(successMessage);
-        setName("");
-        setSubject("");
-        setEmail("");
-        setMessage("");
+        setStatusType("success")
+        setStatusMessage(successMessage)
+        setName("")
+        setSubject("")
+        setEmail("")
+        setMessage("")
         // show success briefly then close the form
         closeTimeout.current = setTimeout(() => {
-          setStatusType(null);
-          setStatusMessage(null);
-          onClose();
-        }, closeDelay);
+          setStatusType(null)
+          setStatusMessage(null)
+          onClose()
+        }, closeDelay)
       })
       .catch((err) => {
-        console.error("Contact send error:", err);
-        setStatusType("error");
-        setStatusMessage("Failed to send — please try again later.");
+        console.error("Contact send error:", err)
+        setStatusType("error")
+        setStatusMessage("Failed to send — please try again later.")
       })
-      .finally(() => setLoading(false));
-  };
+      .finally(() => setLoading(false))
+  }
 
   const handleCancel = () => {
-    setName("");
-    setSubject("");
-    setEmail("");
-    setMessage("");
-    setStatusType(null);
-    setStatusMessage(null);
-    onClose();
-  };
+    setName("")
+    setSubject("")
+    setEmail("")
+    setMessage("")
+    setStatusType(null)
+    setStatusMessage(null)
+    onClose()
+  }
 
   return (
     <div className="w-full bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
@@ -132,11 +132,15 @@ export default function ContactForm({
           placeholder="Email"
           value={email}
           onChange={(e) => {
-            setEmail(e.target.value);
+            setEmail(e.target.value)
             // clear email-related messages while typing
-            if (statusType === "error" && statusMessage && statusMessage.toLowerCase().includes("email")) {
-              setStatusType(null);
-              setStatusMessage(null);
+            if (
+              statusType === "error" &&
+              statusMessage &&
+              statusMessage.toLowerCase().includes("email")
+            ) {
+              setStatusType(null)
+              setStatusMessage(null)
             }
           }}
         />
@@ -170,14 +174,10 @@ export default function ContactForm({
           Cancel
         </button>
 
-        {statusType === "success" && (
-          <p className="text-sm text-green-600 ml-3">{statusMessage}</p>
-        )}
+        {statusType === "success" && <p className="text-sm text-green-600 ml-3">{statusMessage}</p>}
 
-        {statusType === "error" && (
-          <p className="text-sm text-red-600 ml-3">{statusMessage}</p>
-        )}
+        {statusType === "error" && <p className="text-sm text-red-600 ml-3">{statusMessage}</p>}
       </div>
     </div>
-  );
+  )
 }

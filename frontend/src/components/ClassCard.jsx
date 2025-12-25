@@ -1,7 +1,7 @@
-import "./ClassCard.css";
-import { getClassStyle } from "../constants/classStyles";
-import axios from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import "./ClassCard.css"
+import { getClassStyle } from "../constants/classStyles"
+import axios from "axios"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export default function ClassCard({
   id,
@@ -13,46 +13,42 @@ export default function ClassCard({
   isFull = false,
   subscriptionInactive = false,
 }) {
-  const style = getClassStyle(title);
-  const queryClient = useQueryClient();
+  const style = getClassStyle(title)
+  const queryClient = useQueryClient()
 
   const addBookingMutation = useMutation({
     mutationFn: async (classId) => {
-      const resp = await axios.put(`/api/users/0/booked-classes`, { action: "add", classId });
+      const resp = await axios.put(`/api/users/0/booked-classes`, { action: "add", classId })
       // increment spots_booked on the scheduled class
-      await axios.put(`/api/scheduled-classes/${classId}/plus1`);
-      return resp.data;
+      await axios.put(`/api/scheduled-classes/${classId}/plus1`)
+      return resp.data
     },
     onMutate: async (classId) => {
-      await queryClient.cancelQueries(["booked-classes-id", 0]);
-      const prev = queryClient.getQueryData(["booked-classes-id", 0]);
+      await queryClient.cancelQueries(["booked-classes-id", 0])
+      const prev = queryClient.getQueryData(["booked-classes-id", 0])
 
       queryClient.setQueryData(["booked-classes-id", 0], (old) => ({
         ...old,
         booked_classes_id: [...(old?.booked_classes_id || []), classId],
-      }));
+      }))
 
-      return { prev };
+      return { prev }
     },
     onError: (err, vars, context) => {
-      queryClient.setQueryData(["booked-classes-id", 0], context.prev);
+      queryClient.setQueryData(["booked-classes-id", 0], context.prev)
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["booked-classes-id", 0]);
-      queryClient.invalidateQueries(["booked-classes", 0]);
-      queryClient.invalidateQueries(["scheduled-classes"]);
+      queryClient.invalidateQueries(["booked-classes-id", 0])
+      queryClient.invalidateQueries(["booked-classes", 0])
+      queryClient.invalidateQueries(["scheduled-classes"])
     },
-  });
+  })
 
   return (
     <div className="class-card">
       {/* Header */}
       <div className={`class-card-header ${style.color}`}>
-        <img
-          src={style.logo}
-          alt={`${title} logo`}
-          className="class-card-logo"
-        />
+        <img src={style.logo} alt={`${title} logo`} className="class-card-logo" />
       </div>
 
       {/* Body */}
@@ -76,26 +72,26 @@ export default function ClassCard({
       <div className="class-card-footer">
         <button
           className={`class-card-button ${style.color} ${
-            (disabled || isFull || subscriptionInactive) ? "class-card-button--disabled" : ""
+            disabled || isFull || subscriptionInactive ? "class-card-button--disabled" : ""
           }`}
           onClick={() => {
-            if (disabled || isFull || subscriptionInactive || addBookingMutation.isLoading) return;
-            if (!id) return;
-            addBookingMutation.mutate(id);
+            if (disabled || isFull || subscriptionInactive || addBookingMutation.isLoading) return
+            if (!id) return
+            addBookingMutation.mutate(id)
           }}
           disabled={disabled || isFull || subscriptionInactive || addBookingMutation.isLoading}
         >
           {isFull
             ? "Class Full"
             : subscriptionInactive
-            ? "Inactive Subscription"
-            : disabled
-            ? "Already Booked"
-            : addBookingMutation.isLoading
-            ? "Booking..."
-            : "Book Class"}
+              ? "Inactive Subscription"
+              : disabled
+                ? "Already Booked"
+                : addBookingMutation.isLoading
+                  ? "Booking..."
+                  : "Book Class"}
         </button>
       </div>
     </div>
-  );
+  )
 }

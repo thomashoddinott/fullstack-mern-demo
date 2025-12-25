@@ -1,4 +1,4 @@
-db = db.getSiblingDB("bjj_academy");
+db = db.getSiblingDB("bjj_academy")
 
 // --- START: Class Generation Logic (Transformed from scheduledClasses.js) ---
 
@@ -9,67 +9,64 @@ const uniqueBaseClasses = [
     teacher: "Matteo",
     time_offset: { hours: 7, minutes: 0 }, // Using a fixed time for generation simplicity
     spots_booked: 8,
-    spots_total: 15
+    spots_total: 15,
   },
   {
     title: "BJJ - No-Gi",
     teacher: "Matteo",
     time_offset: { hours: 9, minutes: 30 },
     spots_booked: 12,
-    spots_total: 15
+    spots_total: 15,
   },
   {
     title: "Yoga Flow",
     teacher: "Maria",
     time_offset: { hours: 8, minutes: 0 },
     spots_booked: 5,
-    spots_total: 10
+    spots_total: 10,
   },
   {
     title: "Strength & Conditioning",
     teacher: "John",
     time_offset: { hours: 10, minutes: 0 },
     spots_booked: 15,
-    spots_total: 20
+    spots_total: 20,
   },
-];
+]
 
 // Start generating from November 26, 2025
-const startDate = new Date("2025-11-26T00:00:00");
+const startDate = new Date("2025-11-26T00:00:00")
 // End date is December 31, 2025
-const endDate = new Date("2025-12-31T23:59:59");
-const totalClassesToGenerate = 200;
+const endDate = new Date("2025-12-31T23:59:59")
+const totalClassesToGenerate = 200
 
-let currentClassId = 9;
-let generatedClasses = [];
-let currentDate = new Date(startDate);
-let classIndex = 0;
+let currentClassId = 9
+let generatedClasses = []
+let currentDate = new Date(startDate)
+let classIndex = 0
 
 // Helper to format date/time to ISO string "YYYY-MM-DDTHH:MM"
 const toISOStringLocal = (date) => {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const min = String(date.getMinutes()).padStart(2, "0");
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, "0")
+  const dd = String(date.getDate()).padStart(2, "0")
+  const hh = String(date.getHours()).padStart(2, "0")
+  const min = String(date.getMinutes()).padStart(2, "0")
   // Note: This returns a local time string, which is appropriate for UI display
-  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-};
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`
+}
 
 // Loop to generate 200 classes
-while (
-  generatedClasses.length < totalClassesToGenerate &&
-  currentDate <= endDate
-) {
-  const baseClass = uniqueBaseClasses[classIndex % uniqueBaseClasses.length];
-  const startTime = new Date(currentDate);
+while (generatedClasses.length < totalClassesToGenerate && currentDate <= endDate) {
+  const baseClass = uniqueBaseClasses[classIndex % uniqueBaseClasses.length]
+  const startTime = new Date(currentDate)
 
   // Set the time based on the base class's offset
-  startTime.setHours(baseClass.time_offset.hours);
-  startTime.setMinutes(baseClass.time_offset.minutes);
+  startTime.setHours(baseClass.time_offset.hours)
+  startTime.setMinutes(baseClass.time_offset.minutes)
 
-  const endTime = new Date(startTime);
-  endTime.setHours(startTime.getHours() + 1); // Ensure 1 hour duration
+  const endTime = new Date(startTime)
+  endTime.setHours(startTime.getHours() + 1) // Ensure 1 hour duration
 
   const newClass = {
     id: currentClassId++,
@@ -78,22 +75,22 @@ while (
     start: toISOStringLocal(startTime),
     end: toISOStringLocal(endTime),
     spots_booked: baseClass.spots_booked,
-    spots_total: baseClass.spots_total
-  };
+    spots_total: baseClass.spots_total,
+  }
 
-  generatedClasses.push(newClass);
+  generatedClasses.push(newClass)
 
   // Move to the next unique class type for the next iteration
-  classIndex++;
+  classIndex++
 
   // Advance the date only after cycling through the unique base classes once
   if (classIndex % uniqueBaseClasses.length === 0) {
-    currentDate.setDate(currentDate.getDate() + 1);
+    currentDate.setDate(currentDate.getDate() + 1)
   }
 }
 
 // Seed the new scheduledClasses collection with the generated data
-db.scheduledClasses.insertMany(generatedClasses);
+db.scheduledClasses.insertMany(generatedClasses)
 // --- END: Class Generation Logic ---
 
 db.users.insertMany([
@@ -148,7 +145,7 @@ db.users.insertMany([
     },
     booked_classes_id: [9, 13, 15],
   },
-]);
+])
 
 db["user-avatars"].insertMany([
   {
@@ -167,13 +164,13 @@ db["user-avatars"].insertMany([
     avatar:
       "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",
   },
-]);
+])
 
 db.plans.insertMany([
   { id: "1m", label: "1 Month", price: "$99", details: "Monthly plan" },
   { id: "3m", label: "3 Months", price: "$150", details: "Quarterly plan" },
   { id: "12m", label: "12 Months", price: "$500", details: "Yearly plan" },
-]);
+])
 
 // Seed classes collection
 db.classes.insertMany([
@@ -197,7 +194,7 @@ db.classes.insertMany([
     description: `Functional training to enhance explosive power, stability, and endurance. Includes kettlebells, mobility drills, and core circuits tailored for combat athletes.`,
     teacherIds: [6, 7],
   },
-]);
+])
 
 // Seed teachers collection
 db.teachers.insertMany([
@@ -265,4 +262,4 @@ db.teachers.insertMany([
     bio: "An experienced coach dedicated to helping students grow in skill, discipline, and confidence. Focuses on technique, mindset, and steady progress.",
     quirkyFact: "Once taught a class on a moving train for charity.",
   },
-]);
+])

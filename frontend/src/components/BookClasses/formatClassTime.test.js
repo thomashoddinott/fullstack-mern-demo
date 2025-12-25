@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest'
-import { formatClassTime } from './BookClasses'
+import { describe, it, expect } from "vitest"
+import { formatClassTime } from "./BookClasses"
 
-describe('formatClassTime', () => {
-  it('formats start and end datetimes into MM/DD | h:mm AM/PM - h:mm AM/PM', () => {
-    const start = '2025-12-16T09:30:00Z'
-    const end = '2025-12-16T10:45:00Z'
+describe("formatClassTime", () => {
+  it("formats start and end datetimes into MM/DD | h:mm AM/PM - h:mm AM/PM", () => {
+    const start = "2025-12-16T09:30:00Z"
+    const end = "2025-12-16T10:45:00Z"
 
     const out = formatClassTime(start, end)
 

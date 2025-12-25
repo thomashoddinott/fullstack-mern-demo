@@ -1,10 +1,10 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./Layout";
-import HomePage from "./pages/HomePage";
-import ClassesPage from "./pages/ClassesPage";
-import SubscriptionPage from "./pages/SubscriptionPage";
-import SchedulePage from "./pages/SchedulePage";
-import AboutPage from "./pages/AboutPage";
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import Layout from "./Layout"
+import HomePage from "./pages/HomePage"
+import ClassesPage from "./pages/ClassesPage"
+import SubscriptionPage from "./pages/SubscriptionPage"
+import SchedulePage from "./pages/SchedulePage"
+import AboutPage from "./pages/AboutPage"
 
 const routes = [
   {
@@ -33,12 +33,12 @@ const routes = [
       },
     ],
   },
-];
+]
 
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(routes)
 
 function App() {
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />
 }
 
-export default App;
+export default App

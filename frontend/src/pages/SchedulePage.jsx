@@ -1,15 +1,19 @@
-import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { getClassStyle } from "../constants/classStyles";
+import FullCalendar from "@fullcalendar/react"
+import timeGridPlugin from "@fullcalendar/timegrid"
+import interactionPlugin from "@fullcalendar/interaction"
+import { useQuery } from "@tanstack/react-query"
+import axios from "axios"
+import { getClassStyle } from "../constants/classStyles"
 
 export default function SchedulePage() {
-  const { data: scheduled, isLoading, isError } = useQuery({
+  const {
+    data: scheduled,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["scheduled-classes"],
-    queryFn: () => axios.get('/api/scheduled-classes').then((res) => res.data),
-  });
+    queryFn: () => axios.get("/api/scheduled-classes").then((res) => res.data),
+  })
 
   if (isLoading) {
     return (
@@ -17,7 +21,7 @@ export default function SchedulePage() {
         <h1 className="text-4xl font-bold mb-6 text-gray-800">Weekly Schedule</h1>
         <div>Loading schedule...</div>
       </div>
-    );
+    )
   }
 
   if (isError) {
@@ -26,20 +30,20 @@ export default function SchedulePage() {
         <h1 className="text-4xl font-bold mb-6 text-gray-800">Weekly Schedule</h1>
         <div>Error loading schedule</div>
       </div>
-    );
+    )
   }
 
   const events = (scheduled || []).map((s) => {
-    const title = s.title || s.name || "";
-    const style = getClassStyle(title) || {};
+    const title = s.title || s.name || ""
+    const style = getClassStyle(title) || {}
     return {
       id: s.id,
       title,
       start: s.start,
       end: s.end,
       backgroundColor: style.hexColor,
-    };
-  });
+    }
+  })
 
   return (
     <div className="pt-20 px-6 max-w-6xl mx-auto">
@@ -53,7 +57,7 @@ export default function SchedulePage() {
         allDaySlot={false}
         events={events}
         eventClick={(info) => {
-          alert(`Book class: ${info.event.title}`);
+          alert(`Book class: ${info.event.title}`)
         }}
         height="auto"
         headerToolbar={{
@@ -63,5 +67,5 @@ export default function SchedulePage() {
         }}
       />
     </div>
-  );
+  )
 }

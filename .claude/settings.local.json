@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(cloc:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(chmod:*)",
+      "Bash(cat:*)"
     ]
   }
 }
