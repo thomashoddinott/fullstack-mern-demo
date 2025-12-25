@@ -1,14 +1,7 @@
-import "./TeacherModal.css";
+import "./TeacherModal.css"
 
-export default function TeacherModal({
-  isOpen,
-  onClose,
-  name,
-  photo,
-  bio,
-  quirkyFact,
-}) {
-  if (!isOpen) return null;
+export default function TeacherModal({ isOpen, onClose, name, photo, bio, quirkyFact }) {
+  if (!isOpen) return null
 
   return (
     <div className="teacher-modal-backdrop" onClick={onClose}>
@@ -22,5 +15,5 @@ export default function TeacherModal({
         <p className="teacher-modal-fact">💡 {quirkyFact}</p>
       </div>
     </div>
-  );
+  )
 }

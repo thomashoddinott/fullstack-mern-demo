@@ -13,12 +13,14 @@ This is a fullstack BJJ (Brazilian Jiu-Jitsu) academy management application bui
 The development environment requires three separate terminal sessions:
 
 **Frontend** (shell 1):
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 **Database** (shell 2):
+
 ```bash
 cd backend
 docker compose down --volumes  # Reset database if needed
@@ -26,6 +28,7 @@ docker compose up -d
 ```
 
 **Backend** (shell 3):
+
 ```bash
 cd backend
 npm run dev
@@ -36,6 +39,7 @@ The frontend runs on `http://localhost:5173` (Vite dev server) and proxies API r
 ### Database Access
 
 MongoDB runs in Docker as `bjj-mongo` on port 27017. To inspect the database:
+
 ```bash
 docker exec -it bjj-mongo mongosh
 ```
@@ -49,6 +53,7 @@ Or use the VSCode DocumentDB extension.
 The backend is a monolithic Express.js application in [backend/src/server.js](backend/src/server.js). All API routes, database logic, and middleware are in this single file (~347 lines).
 
 **Key Backend Patterns:**
+
 - Direct MongoDB driver usage (no ORM/ODM like Mongoose)
 - Database: `bjj_academy` with collections: `users`, `user-avatars`, `plans`, `classes`, `teachers`, `scheduledClasses`
 - Numeric IDs for all entities (not MongoDB ObjectIds)
@@ -57,6 +62,7 @@ The backend is a monolithic Express.js application in [backend/src/server.js](ba
 - Database initialization via [backend/docker/init.js](backend/docker/init.js) - generates 200 scheduled classes programmatically
 
 **API Endpoints:**
+
 - `GET /api/users/:id` - Get user by ID
 - `GET /api/users/:id/avatar` - Get user avatar (returns image/jpeg)
 - `PUT /api/users/:id/avatar` - Upload user avatar (multipart/form-data)
@@ -76,11 +82,13 @@ The backend is a monolithic Express.js application in [backend/src/server.js](ba
 React 19 application using Vite, React Router v7, and TanStack Query for data fetching.
 
 **Directory Structure:**
+
 - `src/pages/` - Route components (HomePage, ClassesPage, SubscriptionPage, SchedulePage, AboutPage)
 - `src/components/` - Reusable components (Navbar, ClassCard, UserCard, BookClasses, etc.)
 - `src/constants/` - Shared constants (e.g., classStyles.js for class type colors)
 
 **Key Frontend Patterns:**
+
 - React Router with `<Layout>` wrapper for consistent navigation
 - TanStack Query for all API calls with query keys like `["scheduled-classes", { limit: 4 }]`
 - Axios for HTTP requests (proxied through Vite dev server)
@@ -89,6 +97,7 @@ React 19 application using Vite, React Router v7, and TanStack Query for data fe
 - FullCalendar library for schedule visualization
 
 **State Management:**
+
 - No global state management (Redux/Zustand) - using TanStack Query cache
 - User booked classes tracked via `["booked-classes-id", userId]` query
 
@@ -97,6 +106,7 @@ React 19 application using Vite, React Router v7, and TanStack Query for data fe
 **Current State:** The application hardcodes user ID `0` throughout the frontend. There is NO authentication or login system. The subscription expiry logic exists in the database but is not enforced on the frontend for class bookings.
 
 **Important Notes:**
+
 - User data is fetched from `/api/users/0`
 - When working on features that involve users, be aware of this limitation
 - Subscription status (`active`/`inactive`) is stored in user documents with `subscription_expiry` dates
@@ -125,6 +135,7 @@ npm run lint             # Run ESLint
 ```
 
 **Running a Single Test:**
+
 ```bash
 cd frontend
 npm test -- formatClassTime.test.js
@@ -149,10 +160,12 @@ docker compose down --volumes  # Stop and reset database
 This project uses Prettier for code formatting and ESLint for linting (frontend only).
 
 **Automatic Formatting:**
+
 - Pre-commit hooks automatically format staged files before each commit
 - VS Code formats on save (if configured with recommended extensions)
 
 **Manual Commands (from root directory):**
+
 ```bash
 # Format all files
 npm run format
@@ -165,6 +178,7 @@ npm run lint:frontend
 ```
 
 **Setup for New Developers:**
+
 1. Install dependencies: `npm install` (in root directory)
 2. Husky will auto-install Git hooks
 3. Install recommended VS Code extensions (Prettier, ESLint)
@@ -172,11 +186,13 @@ npm run lint:frontend
 
 **Disabling Pre-commit Hooks:**
 If you need to commit without formatting (not recommended):
+
 ```bash
 git commit --no-verify -m "Your message"
 ```
 
 **Configuration:**
+
 - [.prettierrc](.prettierrc) - Prettier formatting rules (no semicolons, double quotes, 2-space indent)
 - [frontend/eslint.config.js](frontend/eslint.config.js) - ESLint rules for frontend
 - [.lintstagedrc.json](.lintstagedrc.json) - Files to format on pre-commit
@@ -227,6 +243,7 @@ PROD_MONGO_URI=mongodb+srv://...
 ## Recent Work
 
 Recent PRs/commits have focused on subscription logic:
+
 - Correctly handling subscription expiry when extending inactive subscriptions
 - Blocking UI components when subscription is inactive
 - Fixing subscription renewal to update status to "active"

@@ -1,14 +1,14 @@
 // -- Add this at the top of the file --
-import { useState } from "react";
-import ContactForm from "../components/ContactForm";
-import "./AboutPage.css";
+import { useState } from "react"
+import ContactForm from "../components/ContactForm"
+import "./AboutPage.css"
 
 export default function AboutPage() {
-  const [openIndex, setOpenIndex] = useState(null);
-  const [contactOpen, setContactOpen] = useState(false);
-  const [contactInitial, setContactInitial] = useState(null);
-  const [contactSuccessMessage, setContactSuccessMessage] = useState(null);
-  const [contactCloseDelay, setContactCloseDelay] = useState(undefined);
+  const [openIndex, setOpenIndex] = useState(null)
+  const [contactOpen, setContactOpen] = useState(false)
+  const [contactInitial, setContactInitial] = useState(null)
+  const [contactSuccessMessage, setContactSuccessMessage] = useState(null)
+  const [contactCloseDelay, setContactCloseDelay] = useState(undefined)
 
   const faqs = [
     {
@@ -31,11 +31,11 @@ export default function AboutPage() {
       answer:
         "Yes. Our coaches emphasise technique, control, and safety above all. You’ll learn how to tap early and train smart without injuries.",
     },
-  ];
+  ]
 
   const toggle = (i) => {
-    setOpenIndex(openIndex === i ? null : i);
-  };
+    setOpenIndex(openIndex === i ? null : i)
+  }
 
   return (
     <div className="about-wrapper">
@@ -56,22 +56,20 @@ export default function AboutPage() {
           </h3>
 
           <p className="text-lg text-gray-600 leading-relaxed">
-            You will be welcomed into a community that supports your growth on
-            and off the mats. Training improves discipline, confidence, physical
-            fitness, and resilience. Our academy blends technical Brazilian
-            Jiu-Jitsu instruction with a friendly, motivating environment —
-            whether you're starting your first class or sharpening high-level
-            skills.
+            You will be welcomed into a community that supports your growth on and off the mats.
+            Training improves discipline, confidence, physical fitness, and resilience. Our academy
+            blends technical Brazilian Jiu-Jitsu instruction with a friendly, motivating environment
+            — whether you're starting your first class or sharpening high-level skills.
           </p>
 
           <div className="flex gap-3">
             <button
               onClick={() => {
                 // open contact form for a general message
-                setContactInitial(null);
-                setContactSuccessMessage("Message sent — thanks!");
-                setContactCloseDelay(700);
-                setContactOpen((v) => !v);
+                setContactInitial(null)
+                setContactSuccessMessage("Message sent — thanks!")
+                setContactCloseDelay(700)
+                setContactOpen((v) => !v)
               }}
               className="btn-contact"
             >
@@ -86,10 +84,10 @@ export default function AboutPage() {
                   subject: "Trial lesson",
                   email: "",
                   message: "I'm interested in trying BJJ...",
-                });
-                setContactSuccessMessage("Someone will be in touch shortly");
-                setContactCloseDelay(5000);
-                setContactOpen((v) => !v);
+                })
+                setContactSuccessMessage("Someone will be in touch shortly")
+                setContactCloseDelay(5000)
+                setContactOpen((v) => !v)
               }}
               className="btn-trial"
             >
@@ -110,9 +108,7 @@ export default function AboutPage() {
 
       {/* --- FAQ Section --- */}
       <div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">
-          Frequently Asked Questions
-        </h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-8">Frequently Asked Questions</h2>
 
         <div className="space-y-4">
           {faqs.map((faq, i) => (
@@ -121,24 +117,18 @@ export default function AboutPage() {
                 className="w-full text-left px-6 py-4 flex justify-between items-center"
                 onClick={() => toggle(i)}
               >
-                <span className="text-lg font-medium text-gray-800">
-                  {faq.question}
-                </span>
+                <span className="text-lg font-medium text-gray-800">{faq.question}</span>
 
-                <span className="text-gray-600 text-xl">
-                  {openIndex === i ? "−" : "+"}
-                </span>
+                <span className="text-gray-600 text-xl">{openIndex === i ? "−" : "+"}</span>
               </button>
 
               {openIndex === i && (
-                <div className="px-6 pb-4 text-gray-600 leading-relaxed">
-                  {faq.answer}
-                </div>
+                <div className="px-6 pb-4 text-gray-600 leading-relaxed">{faq.answer}</div>
               )}
             </div>
           ))}
         </div>
       </div>
     </div>
-  );
+  )
 }

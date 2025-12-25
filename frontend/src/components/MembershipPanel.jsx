@@ -1,9 +1,9 @@
-import "./MembershipPanel.css";
-import SubscriptionCard from "./SubscriptionCard";
-import { useNavigate } from "react-router-dom";
+import "./MembershipPanel.css"
+import SubscriptionCard from "./SubscriptionCard"
+import { useNavigate } from "react-router-dom"
 
 export default function MembershipPanel() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <SubscriptionCard
@@ -12,5 +12,5 @@ export default function MembershipPanel() {
       buttonText={"Renew Subscription"}
       onButtonClick={() => navigate("/subscriptions")}
     />
-  );
+  )
 }

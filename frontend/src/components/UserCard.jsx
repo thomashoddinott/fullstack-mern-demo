@@ -1,7 +1,7 @@
-import React, { useRef, useState } from "react";
-import axios from "axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import "./UserCard.css";
+import React, { useRef, useState } from "react"
+import axios from "axios"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import "./UserCard.css"
 
 export default function UserCard() {
   // Fetch user data
@@ -12,7 +12,7 @@ export default function UserCard() {
   } = useQuery({
     queryKey: ["user", 0],
     queryFn: () => axios.get(`/api/users/0`).then((res) => res.data),
-  });
+  })
 
   // Fetch avatar separately
   const {
@@ -26,110 +26,104 @@ export default function UserCard() {
         .get(`/api/users/0/avatar`, { responseType: "blob" })
         .then((res) => URL.createObjectURL(res.data)),
     enabled: !!user, // only fetch avatar once user exists
-  });
+  })
 
   // Fetch plan label for display (map plan_id -> label)
-  const planId = user?.subscription?.plan_id;
+  const planId = user?.subscription?.plan_id
   const { data: planData } = useQuery({
     queryKey: ["plan", planId],
     queryFn: () => axios.get(`/api/plans/${planId}`).then((r) => r.data),
     enabled: !!planId,
     staleTime: 1000 * 60 * 5,
-  });
+  })
 
-  const queryClient = useQueryClient();
-  const fileInputRef = useRef(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const queryClient = useQueryClient()
+  const fileInputRef = useRef(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const uploadMutation = useMutation({
     mutationFn: ({ userId, file }) => {
-      const fd = new FormData();
-      fd.append("avatar", file);
+      const fd = new FormData()
+      fd.append("avatar", file)
       return axios.put(`/api/users/${userId}/avatar`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
-      });
+      })
     },
     onMutate: () => setIsUploading(true),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries(["avatar", variables.userId]);
+      queryClient.invalidateQueries(["avatar", variables.userId])
     },
     onSettled: () => setIsUploading(false),
-  });
+  })
 
   function handleAvatarClick() {
-    fileInputRef.current?.click();
+    fileInputRef.current?.click()
   }
 
   function handleFileChange(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const userId = user?.id ?? 0;
-    uploadMutation.mutate({ userId, file });
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+    const userId = user?.id ?? 0
+    uploadMutation.mutate({ userId, file })
     // clear the input so same file can be selected again if needed
-    e.target.value = "";
+    e.target.value = ""
   }
 
   if (isUserLoading || isAvatarLoading) {
-    return <div className="user-card">Loading...</div>;
+    return <div className="user-card">Loading...</div>
   }
 
   if (isUserError || !user || isAvatarError) {
-    return <div className="user-card">Error loading user</div>;
+    return <div className="user-card">Error loading user</div>
   }
 
   // Format subscription expiry
-  const expiryRaw = user.subscription?.expiry;
-  let formattedExpiry = expiryRaw ?? "N/A";
+  const expiryRaw = user.subscription?.expiry
+  let formattedExpiry = expiryRaw ?? "N/A"
   if (expiryRaw) {
-    const d = new Date(expiryRaw);
+    const d = new Date(expiryRaw)
     if (!isNaN(d)) {
       formattedExpiry = d.toLocaleDateString(undefined, {
         year: "numeric",
         month: "long",
         day: "numeric",
-      });
+      })
     }
   }
-  const isSubscriptionInactive = user.subscription?.status === "Inactive";
+  const isSubscriptionInactive = user.subscription?.status === "Inactive"
   // Compute subscription progress percentage (0-100)
   function computeSubscriptionProgress(subscription) {
     try {
-      const today = new Date();
-      const expiryDate = subscription?.expiry ? new Date(subscription.expiry) : null;
-      let startDate = subscription?.start ? new Date(subscription.start) : null;
+      const today = new Date()
+      const expiryDate = subscription?.expiry ? new Date(subscription.expiry) : null
+      let startDate = subscription?.start ? new Date(subscription.start) : null
 
       // If no explicit start date, fall back to the first day of the expiry month
       if (!startDate && expiryDate) {
-        startDate = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), 1);
+        startDate = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), 1)
       }
 
       if (startDate && expiryDate) {
-        const total = expiryDate.getTime() - startDate.getTime();
-        const elapsed = today.getTime() - startDate.getTime();
+        const total = expiryDate.getTime() - startDate.getTime()
+        const elapsed = today.getTime() - startDate.getTime()
         if (total > 0) {
-          let pct = Math.round((elapsed / total) * 100);
-          if (!Number.isFinite(pct)) pct = 0;
-          return Math.max(0, Math.min(100, pct));
+          let pct = Math.round((elapsed / total) * 100)
+          if (!Number.isFinite(pct)) pct = 0
+          return Math.max(0, Math.min(100, pct))
         }
       }
     } catch {
       // fall through
     }
-    return 0;
+    return 0
   }
 
-  const subscriptionProgress = computeSubscriptionProgress(user.subscription);
-
+  const subscriptionProgress = computeSubscriptionProgress(user.subscription)
 
   return (
     <div className="user-card">
       <div className="user-avatar-container">
-        <img
-          src={avatar}
-          alt="User"
-          className="user-avatar"
-          onClick={handleAvatarClick}
-        />
+        <img src={avatar} alt="User" className="user-avatar" onClick={handleAvatarClick} />
         <input
           ref={fileInputRef}
           type="file"
@@ -158,14 +152,18 @@ export default function UserCard() {
       <div className="subscription-card">
         <div className="subscription-header">
           <p>Subscription</p>
-          <span className="subscription-badge">{planData?.label ?? user.subscription?.plan_id ?? "—"}</span>
+          <span className="subscription-badge">
+            {planData?.label ?? user.subscription?.plan_id ?? "—"}
+          </span>
         </div>
-        <p className={`subscription-expiry ${isSubscriptionInactive ? 'subscription-expiry--expired' : ''}`}>
-          {isSubscriptionInactive ? 'Expired:' : 'Expires:'} {formattedExpiry}
+        <p
+          className={`subscription-expiry ${isSubscriptionInactive ? "subscription-expiry--expired" : ""}`}
+        >
+          {isSubscriptionInactive ? "Expired:" : "Expires:"} {formattedExpiry}
         </p>
         <div className="progress-bar">
           <div
-            className={`progress-fill ${subscriptionProgress > 90 ? 'progress-fill--nearing-end' : ''}`}
+            className={`progress-fill ${subscriptionProgress > 90 ? "progress-fill--nearing-end" : ""}`}
             style={{ width: `${subscriptionProgress}%` }}
             aria-valuenow={subscriptionProgress}
             aria-valuemin={0}
@@ -192,5 +190,5 @@ export default function UserCard() {
         </div>
       </div>
     </div>
-  );
+  )
 }

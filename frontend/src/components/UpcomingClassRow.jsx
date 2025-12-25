@@ -1,20 +1,28 @@
-import "./UpcomingClassRow.css";
+import "./UpcomingClassRow.css"
 
 function formatDateString(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
+  if (!dateStr) return ""
+  const d = new Date(dateStr)
+  if (Number.isNaN(d.getTime())) return dateStr
   return d.toLocaleString(undefined, {
     weekday: "short",
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-  });
+  })
 }
 
-export default function UpcomingClassRow({ id, title, date, status = "Confirmed", color, icon, onRemove }) {
-  const formatted = formatDateString(date);
+export default function UpcomingClassRow({
+  id,
+  title,
+  date,
+  status = "Confirmed",
+  color,
+  icon,
+  onRemove,
+}) {
+  const formatted = formatDateString(date)
 
   return (
     <div className="upcoming-class-row">
@@ -35,21 +43,22 @@ export default function UpcomingClassRow({ id, title, date, status = "Confirmed"
             status === "Confirmed"
               ? "status-confirmed"
               : status === "Waitlist"
-              ? "status-waitlist"
-              : "status-cancelled"
+                ? "status-waitlist"
+                : "status-cancelled"
           }`}
         >
           {status}
         </span>
         <button
           onClick={() => {
-            if (typeof onRemove === "function") onRemove(id);
+            if (typeof onRemove === "function") onRemove(id)
           }}
           className="upcoming-class-cancel"
-          aria-label={`Cancel ${title}`}>
+          aria-label={`Cancel ${title}`}
+        >
           ✕
         </button>
       </div>
     </div>
-  );
+  )
 }
