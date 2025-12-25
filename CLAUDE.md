@@ -144,6 +144,44 @@ docker compose down      # Stop MongoDB
 docker compose down --volumes  # Stop and reset database
 ```
 
+### Code Formatting
+
+This project uses Prettier for code formatting and ESLint for linting (frontend only).
+
+**Automatic Formatting:**
+- Pre-commit hooks automatically format staged files before each commit
+- VS Code formats on save (if configured with recommended extensions)
+
+**Manual Commands (from root directory):**
+```bash
+# Format all files
+npm run format
+
+# Check formatting without modifying files (used in CI)
+npm run format:check
+
+# Lint frontend code
+npm run lint:frontend
+```
+
+**Setup for New Developers:**
+1. Install dependencies: `npm install` (in root directory)
+2. Husky will auto-install Git hooks
+3. Install recommended VS Code extensions (Prettier, ESLint)
+4. VS Code will auto-format on save
+
+**Disabling Pre-commit Hooks:**
+If you need to commit without formatting (not recommended):
+```bash
+git commit --no-verify -m "Your message"
+```
+
+**Configuration:**
+- [.prettierrc](.prettierrc) - Prettier formatting rules (no semicolons, double quotes, 2-space indent)
+- [frontend/eslint.config.js](frontend/eslint.config.js) - ESLint rules for frontend
+- [.lintstagedrc.json](.lintstagedrc.json) - Files to format on pre-commit
+- [.vscode/settings.json](.vscode/settings.json) - VS Code auto-format settings
+
 ### End-to-End Testing
 
 Cypress is configured for E2E tests but currently only has a contact form test.

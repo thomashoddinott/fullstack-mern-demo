@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+build
+*.min.js
+
+# Backend data
+backend/docker/data
+
+# Coverage reports
+coverage
+.nyc_output
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Git
+.git
+
+# IDE
+.DS_Store
+.vscode
+.idea
+
+# Cypress
+frontend/cypress/videos
+frontend/cypress/screenshots
+
+# Lock files (binary format)
+package-lock.json
+frontend/package-lock.json
+backend/package-lock.json
+
+# Temporary
+.claude
+.playwright-mcp
