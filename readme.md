@@ -1,10 +1,12 @@
 ### Dev
 
-shell1 > `cd frontend` & `npm run dev`
+Run all services from the root directory:
 
-shell2 > `cd backend` & `docker compose down --volumes`, `docker compose up -d`
+```bash
+npm run dev
+```
 
-shell3 > `cd backend` & `npm run dev`
+This starts the frontend (Vite), backend (Express), and MongoDB (Docker) concurrently.
 
 ### Todos
 
