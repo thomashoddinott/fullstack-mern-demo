@@ -4,8 +4,11 @@ import { MongoClient, Binary } from "mongodb"
 import cors from "cors" // is this necessary at this stage?
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
+import Stripe from "stripe"
 
 dotenv.config({ path: "../.env" })
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const app = express()
 app.use(express.json())
@@ -463,6 +466,61 @@ app.patch("/api/users/:id/extend-subscription/:plan", async (req, res) => {
   } catch (err) {
     console.error("Error extending subscription expiry:", err)
     return res.status(500).json({ error: "Internal server error" })
+  }
+})
+
+// Stripe checkout endpoint
+app.post("/api/checkout", async (req, res) => {
+  try {
+    const { plan, userId } = req.body
+
+    if (!plan || !plan.name || !plan.price) {
+      return res.status(400).json({ error: "Invalid plan data" })
+    }
+
+    const line_items = [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: { name: plan.name },
+          unit_amount: plan.price * 100,
+        },
+        quantity: 1,
+      },
+    ]
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items,
+      mode: "payment",
+      success_url: `http://localhost:5173/payment-result?success=true&session_id={CHECKOUT_SESSION_ID}&plan=${plan.id}&userId=${userId}`,
+      cancel_url: `http://localhost:5173/payment-result?success=false&session_id={CHECKOUT_SESSION_ID}`,
+    })
+
+    res.json({ url: session.url })
+  } catch (error) {
+    console.error("Stripe checkout error:", error)
+    res.status(500).json({ error: "Checkout session failed" })
+  }
+})
+
+// Retrieve checkout session and return payment status
+app.get("/api/checkout/session", async (req, res) => {
+  try {
+    const { session_id } = req.query
+
+    if (!session_id) {
+      return res.status(400).json({ error: "Missing session_id query parameter" })
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(session_id)
+
+    const paid = session.payment_status === "paid"
+
+    res.json({ paid, session })
+  } catch (error) {
+    console.error("Error retrieving session:", error)
+    res.status(500).json({ error: "Unable to retrieve session" })
   }
 })
 

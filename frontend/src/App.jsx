@@ -5,6 +5,7 @@ import ClassesPage from "./pages/ClassesPage"
 import SubscriptionPage from "./pages/SubscriptionPage"
 import SchedulePage from "./pages/SchedulePage"
 import AboutPage from "./pages/AboutPage"
+import PaymentResult from "./components/PaymentResult"
 
 const routes = [
   {
@@ -32,6 +33,10 @@ const routes = [
         element: <AboutPage />,
       },
     ],
+  },
+  {
+    path: "/payment-result",
+    element: <PaymentResult />,
   },
 ]
 
