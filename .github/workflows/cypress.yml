@@ -13,11 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. Pin Node to a compatible patch version + enable npm cache
+      # 1. Use Node 25 + enable npm cache
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.18.0"
+          node-version: "25"
           cache: "npm"
 
       # 2. Cache Cypress binary
