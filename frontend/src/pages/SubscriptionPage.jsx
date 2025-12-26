@@ -1,6 +1,6 @@
 import React from "react"
 import axios from "axios"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import "./SubscriptionPage.css"
 import SubscriptionCard from "../components/SubscriptionCard"
 
@@ -14,7 +14,6 @@ export default function SubscriptionPage() {
     queryFn: () => axios.get("/api/plans").then((res) => res.data),
   })
 
-  const qc = useQueryClient()
   // Fetch user and plan via useQuery so handler can rely on cached data.
   const userQuery = useQuery({
     queryKey: ["user", 0],
@@ -33,13 +32,51 @@ export default function SubscriptionPage() {
       }
 
       const userId = userQuery.data?.id ?? 0
-      await axios.patch(`/api/users/${userId}/extend-subscription/${currentPlanId}`)
-      // refresh cached user data
-      qc.invalidateQueries(["user", userId])
-      alert("Subscription extended")
+
+      // Find the current plan details to pass to Stripe
+      const currentPlan = plans?.find((p) => p.id === currentPlanId)
+      if (!currentPlan) {
+        alert("Could not find plan details")
+        return
+      }
+
+      // Create Stripe checkout session
+      const res = await axios.post("http://localhost:8000/api/checkout", {
+        plan: {
+          id: currentPlan.id,
+          name: currentPlan.label,
+          price: parseFloat(currentPlan.price.replace("$", "")),
+        },
+        userId,
+      })
+
+      // Redirect to Stripe checkout
+      window.location.href = res.data.url
     } catch (err) {
       console.error("Extend failed", err)
-      alert("Failed to extend subscription")
+      alert("Failed to initiate checkout")
+    }
+  }
+
+  const handleSelectPlan = async (plan) => {
+    try {
+      const userId = userQuery.data?.id ?? 0
+
+      // Create Stripe checkout session
+      const res = await axios.post("http://localhost:8000/api/checkout", {
+        plan: {
+          id: plan.id,
+          name: plan.label,
+          price: parseFloat(plan.price.replace("$", "")),
+        },
+        userId,
+      })
+
+      // Redirect to Stripe checkout
+      window.location.href = res.data.url
+    } catch (err) {
+      console.error("Checkout failed", err)
+      alert("Failed to initiate checkout")
     }
   }
 
@@ -72,7 +109,7 @@ export default function SubscriptionPage() {
 
                 <p className="plan-price">{plan.price}</p>
 
-                <button className="select-btn" onClick={() => alert(`You selected: ${plan.label}`)}>
+                <button className="select-btn" onClick={() => handleSelectPlan(plan)}>
                   Select Plan
                 </button>
               </div>

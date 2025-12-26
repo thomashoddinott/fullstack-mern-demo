@@ -1,7 +1,75 @@
 /* eslint-disable no-undef */
 describe("Subscription renewal", () => {
-  it("clicking Pay now increases Days Left by 31", () => {
+  it("clicking Pay now initiates Stripe checkout with correct data", () => {
     // Prepare initial user data: subscription expiry 10 days from now
+    const now = new Date()
+    const msPerDay = 24 * 60 * 60 * 1000
+    const initialExpiry = new Date(now.getTime() + 10 * msPerDay).toISOString()
+
+    const user = {
+      id: 0,
+      name: "Test User",
+      subscription: {
+        plan_id: "1m",
+        expiry: initialExpiry,
+      },
+    }
+
+    // Plan data
+    const plan = {
+      id: "1m",
+      label: "1 month",
+      price: "$99",
+      billing: "Monthly",
+    }
+
+    const plans = [plan]
+
+    // Intercept the user GET
+    cy.intercept("GET", "/api/users/0", { statusCode: 200, body: user }).as("getUser")
+
+    // Intercept the plans endpoint
+    cy.intercept("GET", "/api/plans", { statusCode: 200, body: plans }).as("getPlans")
+
+    // Intercept individual plan fetch
+    cy.intercept("GET", "/api/plans/*", { statusCode: 200, body: plan }).as("getPlan")
+
+    // Mock the Stripe checkout session creation
+    cy.intercept("POST", "http://localhost:8000/api/checkout", (req) => {
+      // Verify the request contains the correct plan data
+      expect(req.body.plan.id).to.equal("1m")
+      expect(req.body.plan.name).to.equal("1 month")
+      expect(req.body.plan.price).to.equal(99)
+      expect(req.body.userId).to.equal(0)
+
+      // Don't actually respond - this will prevent the redirect
+      // Just let it hang so we can verify the request was made
+      req.reply({ forceNetworkError: true })
+    }).as("createCheckout")
+
+    // Visit the subscriptions page
+    cy.visit("/subscriptions")
+
+    // Wait for initial data load
+    cy.wait("@getUser")
+    cy.wait("@getPlans")
+
+    // Find the element that shows Days Left
+    cy.contains(".subscription-label-ui", /Days Left/i).should("exist")
+
+    // Click the Pay now button
+    cy.contains("button", /Pay now/i).click()
+
+    // Wait for and verify Stripe checkout session was requested with correct data
+    cy.wait("@createCheckout").then((interception) => {
+      // Additional verification
+      expect(interception.request.body.plan.id).to.equal("1m")
+      expect(interception.request.body.userId).to.equal(0)
+    })
+  })
+
+  it("simulates successful payment and subscription extension", () => {
+    // This test simulates the webhook flow after Stripe payment
     const now = new Date()
     const msPerDay = 24 * 60 * 60 * 1000
     const initialExpiry = new Date(now.getTime() + 10 * msPerDay).toISOString()
@@ -16,21 +84,25 @@ describe("Subscription renewal", () => {
     }
     let currentUser = Object.assign({}, user)
 
-    // Plan data (if page fetches it)
     const plan = {
       id: "1m",
       label: "1 month",
+      price: "$99",
+      billing: "Monthly",
     }
 
-    // Intercept the user GET used by the page. Return `currentUser` so we can update it after PATCH.
+    // Intercept the user GET - return current user state
     cy.intercept("GET", "/api/users/0", (req) => {
       req.reply({ statusCode: 200, body: currentUser })
     }).as("getUser")
 
-    // If the page fetches a plan endpoint, stub it too
+    // Intercept the plans endpoint
+    cy.intercept("GET", "/api/plans", { statusCode: 200, body: [plan] }).as("getPlans")
+
+    // Intercept individual plan fetch
     cy.intercept("GET", "/api/plans/*", { statusCode: 200, body: plan }).as("getPlan")
 
-    // Intercept the PATCH extend-subscription call. Return a new expiry 31 days later.
+    // Mock the subscription extension endpoint (called by webhook)
     cy.intercept("PATCH", "/api/users/0/extend-subscription/*", (req) => {
       const newExpiry = new Date(
         new Date(currentUser.subscription.expiry).getTime() + 31 * msPerDay
@@ -38,7 +110,6 @@ describe("Subscription renewal", () => {
       const updatedUser = Object.assign({}, currentUser, {
         subscription: Object.assign({}, currentUser.subscription, { expiry: newExpiry }),
       })
-      // update the GET responder's currentUser so subsequent refetches return the updated expiry
       currentUser = updatedUser
       req.reply({ statusCode: 200, body: updatedUser })
     }).as("extendSubscription")
@@ -46,15 +117,11 @@ describe("Subscription renewal", () => {
     // Visit the subscriptions page
     cy.visit("/subscriptions")
 
-    // Wait for initial user load
+    // Wait for initial data load
     cy.wait("@getUser")
+    cy.wait("@getPlans")
 
-    // Find the element that shows Days Left. The SubscriptionCard renders the numeric value in
-    // `.subscription-value-ui` alongside a `.subscription-label-ui` that contains the text "Days Left".
-    cy.contains(".subscription-label-ui", /Days Left/i).should("exist")
-
-    // Extract the initial days left number by finding the sibling value element.
-    // Wait for the Days Left value to be a valid number (not "—")
+    // Get initial days left
     cy.contains(".subscription-label-ui", /Days Left/i)
       .parent()
       .find(".subscription-value-ui")
@@ -63,15 +130,21 @@ describe("Subscription renewal", () => {
       .then((text) => {
         const initialDays = parseInt(text.trim(), 10)
 
-        // Click the Pay now button associated with the subscription card
-        cy.contains("button", /Pay now/i).click()
+        // Manually update currentUser to simulate webhook
+        const newExpiry = new Date(
+          new Date(currentUser.subscription.expiry).getTime() + 31 * msPerDay
+        ).toISOString()
+        currentUser = Object.assign({}, currentUser, {
+          subscription: Object.assign({}, currentUser.subscription, { expiry: newExpiry }),
+        })
 
-        // Wait for PATCH request and for the refetch of the user data
-        cy.wait("@extendSubscription")
+        // Reload to trigger refetch (simulating return from Stripe)
+        cy.reload()
+
+        // Wait for data reload - should now return the updated currentUser
         cy.wait("@getUser")
 
-        // After the server responds and the query refetch completes, the UI should update.
-        // Wait for the Days Left value to be a valid number (not "—")
+        // Verify the days increased by 31
         cy.contains(".subscription-label-ui", /Days Left/i)
           .parent()
           .find(".subscription-value-ui")
