@@ -208,12 +208,13 @@ git commit --no-verify -m "Your message"
 
 ### End-to-End Testing
 
-Cypress is configured for E2E tests but currently only has a contact form test.
+Cypress is configured at the root level for E2E tests but currently only has a contact form test.
 
 ```bash
-cd frontend
-npx cypress open         # Interactive mode
-npx cypress run --spec "cypress/e2e/contact.spec.cy.js"  # Headless
+# From root directory
+npm run cypress:open     # Interactive mode
+npm run cypress:run      # Headless (runs all tests)
+npm run cypress:run -- --spec "cypress/e2e/contact.spec.cy.js"  # Run specific test
 ```
 
 **CI:** GitHub Actions runs Cypress tests on push/PR to main ([.github/workflows/cypress.yml](.github/workflows/cypress.yml))
