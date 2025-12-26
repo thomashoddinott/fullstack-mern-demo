@@ -8,7 +8,10 @@
       "Bash(npm test:*)",
       "Bash(rm:*)",
       "Bash(npm run format:check:*)",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "Bash(mv:*)",
+      "Bash(npm install:*)",
+      "Bash(npx cypress verify)"
     ]
   }
 }

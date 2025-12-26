@@ -14,7 +14,9 @@
     "lint:frontend": "cd frontend && npm run lint",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -23,10 +25,12 @@
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/ui": "^4.0.15",
     "concurrently": "^9.2.1",
+    "cypress": "^15.7.1",
     "husky": "^9.0.0",
     "jsdom": "^27.3.0",
     "lint-staged": "^15.2.0",
     "prettier": "^3.2.0",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "wait-on": "^9.0.3"
   }
 }

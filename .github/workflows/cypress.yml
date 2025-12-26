@@ -19,14 +19,16 @@ jobs:
         with:
           node-version: "18.18.0"
           cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
 
       # 2. Cache Cypress binary
       - name: Cache Cypress binary
         uses: actions/cache@v4
         with:
           path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install root dependencies
+        run: npm ci
 
       - name: Install frontend dependencies
         run: |
@@ -45,11 +47,8 @@ jobs:
           npm run preview -- --port 5173 &
           npx wait-on http://localhost:5173 --timeout 60000
 
-      # 5. Minor hygiene improvements
+      # 4. Run Cypress tests from root
       - name: Run Cypress tests
         env:
           CI: true
-        run: |
-          cd frontend
-          # Run the full E2E suite under cypress/e2e
-          npx cypress run --browser chrome --headless
+        run: npm run cypress:run -- --browser chrome --headless
