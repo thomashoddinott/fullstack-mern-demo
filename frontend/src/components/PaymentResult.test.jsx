@@ -35,16 +35,13 @@ describe("PaymentResult URL Parameter Parsing", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/api/checkout/session",
-        {
-          params: { session_id: "cs_test_123" },
-        },
-      )
+      expect(axios.get).toHaveBeenCalledWith("http://localhost:8000/api/checkout/session", {
+        params: { session_id: "cs_test_123" },
+      })
     })
   })
 
@@ -57,12 +54,12 @@ describe("PaymentResult URL Parameter Parsing", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
       expect(axios.patch).toHaveBeenCalledWith(
-        "http://localhost:8000/api/users/5/extend-subscription/2",
+        "http://localhost:8000/api/users/5/extend-subscription/2"
       )
     })
   })
@@ -76,7 +73,7 @@ describe("PaymentResult URL Parameter Parsing", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
@@ -96,7 +93,7 @@ describe("PaymentResult URL Parameter Parsing", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
@@ -113,7 +110,7 @@ describe("PaymentResult URL Parameter Parsing", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
@@ -139,12 +136,12 @@ describe("PaymentResult Subscription Extension Logic", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
       expect(axios.patch).toHaveBeenCalledWith(
-        "http://localhost:8000/api/users/0/extend-subscription/1",
+        "http://localhost:8000/api/users/0/extend-subscription/1"
       )
     })
   })
@@ -160,7 +157,7 @@ describe("PaymentResult Subscription Extension Logic", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
@@ -182,7 +179,7 @@ describe("PaymentResult Subscription Extension Logic", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
@@ -203,7 +200,7 @@ describe("PaymentResult Subscription Extension Logic", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
@@ -225,13 +222,13 @@ describe("PaymentResult Subscription Extension Logic", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
       expect(screen.getByText("Payment Successful 🎉")).toBeInTheDocument()
       expect(
-        screen.getByText("Thank you — your subscription has been extended."),
+        screen.getByText("Thank you — your subscription has been extended.")
       ).toBeInTheDocument()
     })
   })
@@ -247,7 +244,7 @@ describe("PaymentResult Subscription Extension Logic", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
@@ -267,7 +264,7 @@ describe("PaymentResult Subscription Extension Logic", () => {
     render(
       <BrowserRouter>
         <PaymentResult />
-      </BrowserRouter>,
+      </BrowserRouter>
     )
 
     await waitFor(() => {
