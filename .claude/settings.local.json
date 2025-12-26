@@ -4,7 +4,9 @@
       "Bash(cloc:*)",
       "Bash(wc:*)",
       "Bash(chmod:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm test:*)",
+      "Bash(rm:*)"
     ]
   }
 }

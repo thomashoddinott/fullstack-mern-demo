@@ -6,7 +6,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: "./src/test/setup.js",
+    setupFiles: ["./frontend/src/test/setup.js"],
     css: true,
+    include: [
+      "frontend/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "backend/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+    ],
   },
 })

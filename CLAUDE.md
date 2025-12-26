@@ -113,6 +113,26 @@ React 19 application using Vite, React Router v7, and TanStack Query for data fe
 
 ## Common Development Commands
 
+### Root Level
+
+```bash
+# Testing (runs tests from both frontend and backend)
+npm test                 # Run Vitest unit tests
+npm run test:ui          # Run tests with UI
+npm run test:coverage    # Generate coverage report
+
+# Code Quality
+npm run format           # Format all files with Prettier
+npm run format:check     # Check formatting without modifying
+npm run lint:frontend    # Run ESLint on frontend code
+```
+
+**Running a Single Test:**
+
+```bash
+npm test -- formatClassTime.test.js
+```
+
 ### Frontend
 
 ```bash
@@ -125,20 +145,8 @@ npm run dev              # Start Vite dev server (localhost:5173)
 npm run build            # Production build
 npm run preview          # Preview production build
 
-# Testing
-npm test                 # Run Vitest unit tests
-npm run test:ui          # Run tests with UI
-npm run test:coverage    # Generate coverage report
-
 # Linting
 npm run lint             # Run ESLint
-```
-
-**Running a Single Test:**
-
-```bash
-cd frontend
-npm test -- formatClassTime.test.js
 ```
 
 ### Backend
@@ -212,9 +220,12 @@ npx cypress run --spec "cypress/e2e/contact.spec.cy.js"  # Headless
 
 ## Testing Strategy
 
-- **Unit tests:** Vitest + React Testing Library (minimal coverage currently - see [frontend/src/components/BookClasses/formatClassTime.test.js](frontend/src/components/BookClasses/formatClassTime.test.js))
+- **Unit tests:** Vitest (configured at root level) + React Testing Library for frontend tests
+  - Currently minimal coverage - see [frontend/src/components/BookClasses/formatClassTime.test.js](frontend/src/components/BookClasses/formatClassTime.test.js)
+  - Vitest is configured to test both `frontend/**/*.test.js` and `backend/**/*.test.js` files
+  - Test configuration: [vitest.config.js](vitest.config.js)
 - **E2E tests:** Cypress (only contact form currently)
-- **No backend tests** currently exist
+- **No backend tests** currently exist, but Vitest is now configured to support them
 
 ## Environment Variables
 
