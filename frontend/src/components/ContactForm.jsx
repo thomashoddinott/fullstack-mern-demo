@@ -1,6 +1,7 @@
 //refactor CSS?
 
 import React, { useState, useEffect, useRef } from "react"
+import { useMutation } from "@tanstack/react-query"
 import axios from "axios"
 
 export default function ContactForm({
@@ -14,18 +15,30 @@ export default function ContactForm({
   const [subject, setSubject] = useState("")
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
-  const [statusType, setStatusType] = useState(null) // 'success' | 'error' | null
-  const [statusMessage, setStatusMessage] = useState(null)
+  const [validationError, setValidationError] = useState(null)
   const closeTimeout = useRef(null)
 
-  const [loading, setLoading] = useState(false)
+  const contactMutation = useMutation({
+    mutationFn: (formData) => axios.post("/api/contact", formData),
+    onSuccess: () => {
+      // Clear form fields
+      setName("")
+      setSubject("")
+      setEmail("")
+      setMessage("")
+      // Auto-close after showing success message
+      closeTimeout.current = setTimeout(() => {
+        contactMutation.reset()
+        onClose()
+      }, closeDelay)
+    },
+  })
 
   useEffect(() => {
     if (!visible) {
       // clear transient state when collapsed
-      setStatusType(null)
-      setStatusMessage(null)
-      setLoading(false)
+      setValidationError(null)
+      contactMutation.reset()
       // clear any initial values when closing
       if (!initialData) {
         setName("")
@@ -41,6 +54,7 @@ export default function ContactForm({
       setMessage(initialData.message ?? "")
     }
 
+    // Cleanup timeout on unmount
     return () => {
       if (closeTimeout.current) {
         clearTimeout(closeTimeout.current)
@@ -60,42 +74,17 @@ export default function ContactForm({
 
   const handleSend = () => {
     if (!name || !email || !message) {
-      setStatusType("error")
-      setStatusMessage("Please fill name, email and message.")
+      setValidationError("Please fill name, email and message.")
       return
     }
 
     if (!isValidEmail(email)) {
-      setStatusType("error")
-      setStatusMessage("Please enter a valid email address.")
+      setValidationError("Please enter a valid email address.")
       return
     }
 
-    setStatusType(null)
-    setStatusMessage(null)
-    setLoading(true)
-    axios
-      .post("/api/contact", { name, subject, email, message })
-      .then(() => {
-        setStatusType("success")
-        setStatusMessage(successMessage)
-        setName("")
-        setSubject("")
-        setEmail("")
-        setMessage("")
-        // show success briefly then close the form
-        closeTimeout.current = setTimeout(() => {
-          setStatusType(null)
-          setStatusMessage(null)
-          onClose()
-        }, closeDelay)
-      })
-      .catch((err) => {
-        console.error("Contact send error:", err)
-        setStatusType("error")
-        setStatusMessage("Failed to send — please try again later.")
-      })
-      .finally(() => setLoading(false))
+    setValidationError(null)
+    contactMutation.mutate({ name, subject, email, message })
   }
 
   const handleCancel = () => {
@@ -103,8 +92,8 @@ export default function ContactForm({
     setSubject("")
     setEmail("")
     setMessage("")
-    setStatusType(null)
-    setStatusMessage(null)
+    setValidationError(null)
+    contactMutation.reset()
     onClose()
   }
 
@@ -133,14 +122,9 @@ export default function ContactForm({
           value={email}
           onChange={(e) => {
             setEmail(e.target.value)
-            // clear email-related messages while typing
-            if (
-              statusType === "error" &&
-              statusMessage &&
-              statusMessage.toLowerCase().includes("email")
-            ) {
-              setStatusType(null)
-              setStatusMessage(null)
+            // clear email-related validation errors while typing
+            if (validationError && validationError.toLowerCase().includes("email")) {
+              setValidationError(null)
             }
           }}
         />
@@ -159,24 +143,28 @@ export default function ContactForm({
 
       <div className="mt-4 flex items-center gap-3">
         <button
-          className={`px-4 py-2 rounded-lg text-white ${loading ? "bg-gray-400" : "bg-red-600 hover:bg-red-700"}`}
+          className={`px-4 py-2 rounded-lg text-white ${contactMutation.isPending ? "bg-gray-400" : "bg-red-600 hover:bg-red-700"}`}
           onClick={handleSend}
-          disabled={loading}
+          disabled={contactMutation.isPending}
         >
-          {loading ? "Sending..." : "Send"}
+          {contactMutation.isPending ? "Sending..." : "Send"}
         </button>
 
         <button
           className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
           onClick={handleCancel}
-          disabled={loading}
+          disabled={contactMutation.isPending}
         >
           Cancel
         </button>
 
-        {statusType === "success" && <p className="text-sm text-green-600 ml-3">{statusMessage}</p>}
+        {contactMutation.isSuccess && <p className="text-sm text-green-600 ml-3">{successMessage}</p>}
 
-        {statusType === "error" && <p className="text-sm text-red-600 ml-3">{statusMessage}</p>}
+        {contactMutation.isError && (
+          <p className="text-sm text-red-600 ml-3">Failed to send — please try again later.</p>
+        )}
+
+        {validationError && <p className="text-sm text-red-600 ml-3">{validationError}</p>}
       </div>
     </div>
   )
