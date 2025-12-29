@@ -1,8 +1,7 @@
-//refactor CSS?
-
-import React, { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useMutation } from "@tanstack/react-query"
 import axios from "axios"
+import "./ContactForm.css"
 
 export default function ContactForm({
   visible = false,
@@ -61,6 +60,7 @@ export default function ContactForm({
         closeTimeout.current = null
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, initialData])
 
   // simple email validation
@@ -98,26 +98,26 @@ export default function ContactForm({
   }
 
   return (
-    <div className="w-full bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
-      <h3 className="text-xl font-semibold text-gray-800 mb-3">Contact Us</h3>
+    <div className="contact-form">
+      <h3 className="contact-form-title">Contact Us</h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="contact-form-grid">
         <input
-          className="border rounded px-3 py-2 w-full"
+          className="contact-input"
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <input
-          className="border rounded px-3 py-2 w-full"
+          className="contact-input"
           placeholder="Subject (optional)"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
         />
 
         <input
-          className="border rounded px-3 py-2 w-full md:col-span-2"
+          className="contact-input--full-width"
           placeholder="Email"
           value={email}
           onChange={(e) => {
@@ -130,20 +130,22 @@ export default function ContactForm({
         />
 
         {!isValidEmail(email) && email.length > 0 && (
-          <p className="text-sm text-red-600 md:col-span-2">Please enter a valid email address.</p>
+          <p className="contact-validation-error">Please enter a valid email address.</p>
         )}
 
         <textarea
-          className="border rounded px-3 py-2 w-full md:col-span-2 h-32 resize-none"
+          className="contact-textarea"
           placeholder="Message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
+      <div className="contact-actions">
         <button
-          className={`px-4 py-2 rounded-lg text-white ${contactMutation.isPending ? "bg-gray-400" : "bg-red-600 hover:bg-red-700"}`}
+          className={
+            contactMutation.isPending ? "contact-button-send--loading" : "contact-button-send"
+          }
           onClick={handleSend}
           disabled={contactMutation.isPending}
         >
@@ -151,20 +153,20 @@ export default function ContactForm({
         </button>
 
         <button
-          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+          className="contact-button-cancel"
           onClick={handleCancel}
           disabled={contactMutation.isPending}
         >
           Cancel
         </button>
 
-        {contactMutation.isSuccess && <p className="text-sm text-green-600 ml-3">{successMessage}</p>}
+        {contactMutation.isSuccess && <p className="contact-success-message">{successMessage}</p>}
 
         {contactMutation.isError && (
-          <p className="text-sm text-red-600 ml-3">Failed to send — please try again later.</p>
+          <p className="contact-error-message">Failed to send — please try again later.</p>
         )}
 
-        {validationError && <p className="text-sm text-red-600 ml-3">{validationError}</p>}
+        {validationError && <p className="contact-error-message">{validationError}</p>}
       </div>
     </div>
   )

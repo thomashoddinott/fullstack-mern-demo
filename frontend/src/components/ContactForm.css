@@ -1,0 +1,60 @@
+@reference "../index.css";
+
+/* Container */
+.contact-form {
+  @apply w-full bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8;
+}
+
+.contact-form-title {
+  @apply text-xl font-semibold text-gray-800 mb-3;
+}
+
+/* Form grid */
+.contact-form-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+/* Input fields */
+.contact-input {
+  @apply border rounded px-3 py-2 w-full;
+}
+
+.contact-input--full-width {
+  @apply border rounded px-3 py-2 w-full md:col-span-2;
+}
+
+.contact-textarea {
+  @apply border rounded px-3 py-2 w-full md:col-span-2 h-32 resize-none;
+}
+
+/* Validation error */
+.contact-validation-error {
+  @apply text-sm text-red-600 md:col-span-2;
+}
+
+/* Actions section */
+.contact-actions {
+  @apply mt-4 flex items-center gap-3;
+}
+
+/* Buttons */
+.contact-button-send {
+  @apply px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700;
+}
+
+.contact-button-send--loading {
+  @apply px-4 py-2 rounded-lg text-white bg-gray-400;
+}
+
+.contact-button-cancel {
+  @apply px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
+}
+
+/* Status messages */
+.contact-success-message {
+  @apply text-sm text-green-600 ml-3;
+}
+
+.contact-error-message {
+  @apply text-sm text-red-600 ml-3;
+}

@@ -11,7 +11,8 @@
       "Bash(npm run format:*)",
       "Bash(mv:*)",
       "Bash(npm install:*)",
-      "Bash(npx cypress verify)"
+      "Bash(npx cypress verify)",
+      "Bash(npm run lint:frontend:*)"
     ]
   }
 }
