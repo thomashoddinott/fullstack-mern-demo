@@ -10,29 +10,13 @@ This is a fullstack BJJ (Brazilian Jiu-Jitsu) academy management application bui
 
 ### Running the Application
 
-The development environment requires three separate terminal sessions:
-
-**Frontend** (shell 1):
+Run all services from the root directory:
 
 ```bash
-cd frontend
 npm run dev
 ```
 
-**Database** (shell 2):
-
-```bash
-cd backend
-docker compose down --volumes  # Reset database if needed
-docker compose up -d
-```
-
-**Backend** (shell 3):
-
-```bash
-cd backend
-npm run dev
-```
+This starts the frontend (Vite), backend (Express), and MongoDB (Docker) concurrently.
 
 The frontend runs on `http://localhost:5173` (Vite dev server) and proxies API requests to the backend at `http://localhost:8000`.
 
@@ -50,7 +34,7 @@ Or use the VSCode DocumentDB extension.
 
 ### Backend Structure
 
-The backend is a monolithic Express.js application in [backend/src/server.js](backend/src/server.js). All API routes, database logic, and middleware are in this single file (~347 lines).
+The backend is a monolithic Express.js application in [backend/src/server.js](backend/src/server.js). All API routes, database logic, and middleware are in this single file.
 
 **Key Backend Patterns:**
 
@@ -95,6 +79,8 @@ React 19 application using Vite, React Router v7, and TanStack Query for data fe
 - Hardcoded user ID `0` for now (no authentication system yet)
 - Tailwind CSS v4 for styling (using Vite plugin)
 - FullCalendar library for schedule visualization
+- **CSS Organization:** Extract component-specific CSS to separate `.css` files (e.g., `BookClasses.css` for `BookClasses.jsx`) rather than keeping styles inline or in the component file
+- **Testing:** Write unit tests for new components using Vitest and React Testing Library. Place test files alongside components (e.g., `BookClasses.test.js` next to `BookClasses.jsx`)
 
 **State Management:**
 
@@ -251,13 +237,3 @@ PROD_MONGO_URI=mongodb+srv://...
 4. **Subscription enforcement** - Expiry logic exists but doesn't block UI interactions
 5. **No TypeScript** - Pure JavaScript codebase
 6. **Direct MongoDB driver** - No schema validation or ORM benefits
-
-## Recent Work
-
-Recent PRs/commits have focused on subscription logic:
-
-- Correctly handling subscription expiry when extending inactive subscriptions
-- Blocking UI components when subscription is inactive
-- Fixing subscription renewal to update status to "active"
-
-See [Issues](https://github.com/thomashoddinott/fullstack-mern-demo/issues) for current work items.
