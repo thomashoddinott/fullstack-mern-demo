@@ -156,4 +156,109 @@ describe("Subscription renewal", () => {
           })
       })
   })
+
+  it("inactive user renews subscription from homepage to active state", () => {
+    // Start with an expired subscription (inactive user)
+    const now = new Date()
+    const msPerDay = 24 * 60 * 60 * 1000
+    const expiredDate = new Date(now.getTime() - 5 * msPerDay).toISOString() // 5 days ago
+
+    const user = {
+      id: 0,
+      name: "Test User",
+      rank: "Blue Belt",
+      subscription: {
+        plan_id: "1m",
+        expiry: expiredDate,
+        status: "Inactive",
+      },
+      stats: {
+        classes_this_month: 12,
+        total_classes: 156,
+        favorite_class: "BJJ Gi",
+      },
+    }
+    let currentUser = Object.assign({}, user)
+
+    const plan = {
+      id: "1m",
+      label: "1 month",
+      price: "$99",
+      billing: "Monthly",
+    }
+
+    // Intercept the user GET - return current user state
+    cy.intercept("GET", "/api/users/0", (req) => {
+      req.reply({ statusCode: 200, body: currentUser })
+    }).as("getUser")
+
+    // Intercept the avatar endpoint (return empty blob)
+    cy.intercept("GET", "/api/users/0/avatar", {
+      statusCode: 200,
+      headers: { "content-type": "image/jpeg" },
+      body: "",
+    }).as("getAvatar")
+
+    // Intercept the plans endpoint
+    cy.intercept("GET", "/api/plans", { statusCode: 200, body: [plan] }).as("getPlans")
+
+    // Intercept individual plan fetch
+    cy.intercept("GET", "/api/plans/*", { statusCode: 200, body: plan }).as("getPlan")
+
+    // Mock Stripe checkout (won't actually redirect)
+    cy.intercept("POST", "http://localhost:8000/api/checkout", (req) => {
+      // Simulate successful payment by updating the user subscription
+      const newExpiry = new Date(now.getTime() + 31 * msPerDay).toISOString()
+      currentUser = Object.assign({}, currentUser, {
+        subscription: Object.assign({}, currentUser.subscription, {
+          expiry: newExpiry,
+          status: "Active",
+        }),
+      })
+      req.reply({ forceNetworkError: true })
+    }).as("createCheckout")
+
+    // Step 1: Begin on homepage with inactive user
+    cy.visit("/")
+
+    // Wait for initial data load
+    cy.wait("@getUser")
+
+    // Verify user status is "Inactive" on homepage
+    cy.contains(".user-status", "Inactive").should("exist")
+
+    // Step 2: Click "Renew Subscription" button
+    cy.contains("button", /Renew Subscription/i).click()
+
+    // Step 3: Verify navigation to /subscriptions
+    cy.url().should("include", "/subscriptions")
+    cy.wait("@getPlans")
+
+    // Step 4: Click "Pay now" button to extend subscription
+    cy.contains("button", /Pay now/i).click()
+    cy.wait("@createCheckout")
+
+    // Simulate return from Stripe by reloading (user is now updated)
+    cy.reload()
+    cy.wait("@getUser")
+
+    // Verify subscription is extended on subscriptions page (days > 25)
+    cy.contains(".subscription-label-ui", /Days Left/i)
+      .parent()
+      .find(".subscription-value-ui")
+      .invoke("text")
+      .then((text) => {
+        const days = parseInt(text.trim(), 10)
+        expect(days).to.be.greaterThan(25) // Should be around 31 days
+      })
+
+    // Step 5: Navigate back to homepage
+    cy.contains("a", /Home/i).click()
+
+    // Wait for user data to load
+    cy.wait("@getUser")
+
+    // Step 6: Verify user status is now "Active" on homepage
+    cy.contains(".user-status", "Active").should("exist")
+  })
 })
