@@ -1,11 +1,15 @@
+import { config } from "dotenv"
+
+// Load environment variables from .env file
+config()
+
 export default {
   e2e: {
     baseUrl: "http://localhost:5173",
     env: {
-      // Firebase test credentials
-      // These should match a real user in your Firebase project
-      TEST_EMAIL: "email@example.com",
-      TEST_PASSWORD: "password123",
+      // Load from environment variables (set in .env for local, GitHub Secrets for CI/CD)
+      TEST_EMAIL: process.env.CYPRESS_TEST_EMAIL,
+      TEST_PASSWORD: process.env.CYPRESS_TEST_PASSWORD,
     },
   },
 }
