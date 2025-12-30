@@ -5,6 +5,7 @@ import cors from "cors" // is this necessary at this stage?
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
 import Stripe from "stripe"
+import { DEFAULT_AVATAR_BASE64 } from "./defaultAvatar.js"
 
 dotenv.config({ path: "../.env" })
 
@@ -106,6 +107,13 @@ app.post("/api/users", async (req, res) => {
     }
 
     await db.collection("users").insertOne(newUser)
+
+    // Create default avatar for new user
+    const defaultAvatar = {
+      userId: id,
+      avatar: DEFAULT_AVATAR_BASE64,
+    }
+    await db.collection("user-avatars").insertOne(defaultAvatar)
 
     res.status(201).json({ message: "User created successfully", user: newUser })
   } catch (err) {
