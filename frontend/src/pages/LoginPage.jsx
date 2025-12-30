@@ -14,7 +14,7 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(getAuth(), email, password)
       navigate("/")
-    } catch (e) {
+    } catch {
       setError("Invalid email or password")
     }
   }
