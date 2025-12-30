@@ -41,8 +41,7 @@ export function signInProgrammatically({ email, password }) {
   const auth = getFirebaseAuth()
 
   return signInWithEmailAndPassword(auth, email, password).catch((error) => {
-    cy.log("User could not sign in programmatically!")
-    console.error("Firebase auth error:", error)
+    console.error("Firebase auth error - User could not sign in programmatically:", error)
     throw error
   })
 }
