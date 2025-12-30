@@ -14,7 +14,8 @@
   color: #333;
 }
 
-.create-account-container input {
+.create-account-container input,
+.create-account-container select {
   width: 100%;
   padding: 12px;
   margin-bottom: 16px;
@@ -24,7 +25,8 @@
   box-sizing: border-box;
 }
 
-.create-account-container input:focus {
+.create-account-container input:focus,
+.create-account-container select:focus {
   outline: none;
   border-color: #4a90e2;
 }

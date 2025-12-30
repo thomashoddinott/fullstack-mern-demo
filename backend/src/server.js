@@ -37,7 +37,8 @@ app.get("/hello", (req, res) => {
 
 app.get("/api/users/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id)
+    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
     const user = await db
       .collection("users")
@@ -66,6 +67,49 @@ app.get("/api/users/:id", async (req, res) => {
     res.json(user[0])
   } catch (err) {
     console.error("Error fetching user:", err)
+    res.status(500).json({ error: "Internal server error" })
+  }
+})
+
+// POST create new user
+app.post("/api/users", async (req, res) => {
+  try {
+    const { id, name, rank } = req.body
+
+    if (!id || !name || !rank) {
+      return res.status(400).json({ message: "id, name, and rank are required" })
+    }
+
+    // Check if user already exists
+    const existing = await db.collection("users").findOne({ id })
+    if (existing) {
+      return res.status(409).json({ message: "User already exists" })
+    }
+
+    // Create new user document
+    const newUser = {
+      id,
+      name,
+      rank,
+      subscription: {
+        status: "Inactive",
+        plan_id: null,
+        expiry: null,
+        start: null,
+      },
+      stats: {
+        classes_this_month: 0,
+        total_classes: 0,
+        favorite_class: null,
+      },
+      booked_classes_id: [],
+    }
+
+    await db.collection("users").insertOne(newUser)
+
+    res.status(201).json({ message: "User created successfully", user: newUser })
+  } catch (err) {
+    console.error("Error creating user:", err)
     res.status(500).json({ error: "Internal server error" })
   }
 })
