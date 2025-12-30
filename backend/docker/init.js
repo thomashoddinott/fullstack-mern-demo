@@ -112,6 +112,23 @@ db.users.insertMany([
     booked_classes_id: [9, 13, 15],
   },
   {
+    id: "TwIjD4UmW4UJo4d8Vgg0CYR7HCy2",
+    name: "John Firebase",
+    rank: "Blue Belt",
+    subscription: {
+      status: "Inactive",
+      plan_id: "1m",
+      expiry: "2025-12-01T00:00:00Z",
+      start: "2025-12-01T00:00:00Z",
+    },
+    stats: {
+      classes_this_month: 12,
+      total_classes: 156,
+      favorite_class: "BJJ Gi",
+    },
+    booked_classes_id: [9, 13, 15],
+  },
+  {
     id: 1,
     name: "Jane Smith",
     rank: "Purple Belt",
