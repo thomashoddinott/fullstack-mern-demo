@@ -7,6 +7,7 @@ A complete signup flow that creates users in both Firebase and MongoDB.
 ## Frontend Changes
 
 ### CreateAccountPage.jsx
+
 - Added **name** input field
 - Added **rank** dropdown (White/Blue/Purple/Brown/Black Belt)
 - On signup:
@@ -17,9 +18,11 @@ A complete signup flow that creates users in both Firebase and MongoDB.
 ## Backend Changes
 
 ### POST /api/users
+
 New endpoint to create users in MongoDB:
 
 **Request:**
+
 ```json
 {
   "id": "firebase-uid-string",
@@ -29,6 +32,7 @@ New endpoint to create users in MongoDB:
 ```
 
 **Response:**
+
 ```json
 {
   "message": "User created successfully",
@@ -53,13 +57,16 @@ New endpoint to create users in MongoDB:
 ```
 
 ### GET /api/users/:id
+
 Updated to support both:
+
 - Numeric IDs (legacy, for user0): `/api/users/0`
 - Firebase UIDs (new users): `/api/users/xK3mP9QzR5fY2cN8...`
 
 ## User Document Structure
 
 New users are created with this structure:
+
 ```javascript
 {
   id: "firebase-uid",           // Firebase UID (string)
@@ -96,6 +103,7 @@ New users are created with this structure:
 ## Next Steps
 
 To fully integrate authentication:
+
 1. Store logged-in user's Firebase UID in app state
 2. Replace hardcoded `userId: 0` with actual Firebase UID from auth
 3. Add auth checks to routes

@@ -28,9 +28,7 @@ describe("Subscription renewal", () => {
     const plans = [plan]
 
     // Intercept the user GET
-    cy.intercept("GET", `/api/users/${TEST_USER_ID}`, { statusCode: 200, body: user }).as(
-      "getUser"
-    )
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}`, { statusCode: 200, body: user }).as("getUser")
 
     // Intercept avatar
     cy.intercept("GET", `/api/users/${TEST_USER_ID}/avatar`, {

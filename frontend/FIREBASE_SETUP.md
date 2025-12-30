@@ -50,12 +50,14 @@ const firebaseConfig = {
 ## How It Works
 
 ### Frontend (Real Firebase Auth)
+
 - Users can create accounts with Firebase
 - Users can log in with Firebase
 - Firebase manages user authentication state
 - **But**: We don't use the Firebase UID or auth token yet
 
 ### Backend (Unchanged)
+
 - Still uses hardcoded `userId: 0` for all API calls
 - No authentication required
 - All existing routes work exactly as before
@@ -79,6 +81,7 @@ const firebaseConfig = {
 ## Next Steps (Future)
 
 When ready to fully integrate:
+
 1. Update backend to accept Firebase auth tokens
 2. Add `authtoken` header to API requests
 3. Change from `userId: 0` to actual user's Firebase UID
