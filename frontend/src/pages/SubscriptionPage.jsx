@@ -3,8 +3,11 @@ import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
 import "./SubscriptionPage.css"
 import SubscriptionCard from "../components/SubscriptionCard"
+import { useAuth } from "../hooks/useAuth"
 
 export default function SubscriptionPage() {
+  const { currentUser } = useAuth()
+
   const {
     data: plans,
     isLoading: plansLoading,
@@ -16,8 +19,9 @@ export default function SubscriptionPage() {
 
   // Fetch user and plan via useQuery so handler can rely on cached data.
   const userQuery = useQuery({
-    queryKey: ["user", 0],
-    queryFn: () => axios.get("/api/users/0").then((r) => r.data),
+    queryKey: ["user", currentUser?.uid],
+    queryFn: () => axios.get(`/api/users/${currentUser?.uid}`).then((r) => r.data),
+    enabled: !!currentUser?.uid,
     staleTime: 1000 * 60 * 1,
   })
 
@@ -88,7 +92,7 @@ export default function SubscriptionPage() {
 
         <SubscriptionCard
           variant="secondary"
-          userId={0}
+          userId={currentUser?.uid}
           buttonText={"Pay now"}
           onButtonClick={handleExtend}
         />

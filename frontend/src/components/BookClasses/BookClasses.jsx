@@ -2,6 +2,7 @@ import "./BookClasses.css"
 import { useNavigate } from "react-router-dom"
 import ClassCard from "../ClassCard"
 import { useQuery } from "@tanstack/react-query"
+import { useAuth } from "../../hooks/useAuth"
 import axios from "axios"
 
 export function formatClassTime(start, end) {
@@ -17,6 +18,8 @@ export function formatClassTime(start, end) {
 
 export default function BookClasses() {
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
+  const userId = currentUser?.uid
 
   // fetch the first 4 scheduled classes from the backend
   const {
@@ -37,16 +40,18 @@ export default function BookClasses() {
 
   // fetch the user's booked class ids so we can disable booking for already-booked classes
   const { data: bookedResp } = useQuery({
-    queryKey: ["booked-classes-id", 0],
-    queryFn: () => axios.get(`/api/users/0/booked-classes-id`).then((r) => r.data),
+    queryKey: ["booked-classes-id", userId],
+    queryFn: () => axios.get(`/api/users/${userId}/booked-classes-id`).then((r) => r.data),
+    enabled: !!userId,
     staleTime: 1000 * 60 * 1,
   })
   const bookedIds = bookedResp?.booked_classes_id ?? []
 
   // fetch the current user so we can check subscription status and block booking when Inactive
   const { data: user } = useQuery({
-    queryKey: ["user", 0],
-    queryFn: () => axios.get(`/api/users/0`).then((r) => r.data),
+    queryKey: ["user", userId],
+    queryFn: () => axios.get(`/api/users/${userId}`).then((r) => r.data),
+    enabled: !!userId,
     staleTime: 1000 * 60 * 1,
   })
   const isSubscriptionInactive = user?.subscription?.status === "Inactive"

@@ -1,17 +1,21 @@
 import React, { useRef, useState } from "react"
 import axios from "axios"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useAuth } from "../hooks/useAuth"
 import "./UserCard.css"
 
 export default function UserCard() {
+  const { currentUser } = useAuth()
+
   // Fetch user data
   const {
     data: user,
     isLoading: isUserLoading,
     isError: isUserError,
   } = useQuery({
-    queryKey: ["user", 0],
-    queryFn: () => axios.get(`/api/users/0`).then((res) => res.data),
+    queryKey: ["user", currentUser?.uid],
+    queryFn: () => axios.get(`/api/users/${currentUser?.uid}`).then((res) => res.data),
+    enabled: !!currentUser?.uid,
   })
 
   // Fetch avatar separately
@@ -20,12 +24,12 @@ export default function UserCard() {
     isLoading: isAvatarLoading,
     isError: isAvatarError,
   } = useQuery({
-    queryKey: ["avatar", 0],
+    queryKey: ["avatar", currentUser?.uid],
     queryFn: () =>
       axios
-        .get(`/api/users/0/avatar`, { responseType: "blob" })
+        .get(`/api/users/${currentUser?.uid}/avatar`, { responseType: "blob" })
         .then((res) => URL.createObjectURL(res.data)),
-    enabled: !!user, // only fetch avatar once user exists
+    enabled: !!user && !!currentUser?.uid, // only fetch avatar once user exists
   })
 
   // Fetch plan label for display (map plan_id -> label)

@@ -1,5 +1,6 @@
 import "./ClassCard.css"
 import { getClassStyle } from "../constants/classStyles"
+import { useAuth } from "../hooks/useAuth"
 import axios from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -15,19 +16,24 @@ export default function ClassCard({
 }) {
   const style = getClassStyle(title)
   const queryClient = useQueryClient()
+  const { currentUser } = useAuth()
+  const userId = currentUser?.uid
 
   const addBookingMutation = useMutation({
     mutationFn: async (classId) => {
-      const resp = await axios.put(`/api/users/0/booked-classes`, { action: "add", classId })
+      const resp = await axios.put(`/api/users/${userId}/booked-classes`, {
+        action: "add",
+        classId,
+      })
       // increment spots_booked on the scheduled class
       await axios.put(`/api/scheduled-classes/${classId}/plus1`)
       return resp.data
     },
     onMutate: async (classId) => {
-      await queryClient.cancelQueries(["booked-classes-id", 0])
-      const prev = queryClient.getQueryData(["booked-classes-id", 0])
+      await queryClient.cancelQueries(["booked-classes-id", userId])
+      const prev = queryClient.getQueryData(["booked-classes-id", userId])
 
-      queryClient.setQueryData(["booked-classes-id", 0], (old) => ({
+      queryClient.setQueryData(["booked-classes-id", userId], (old) => ({
         ...old,
         booked_classes_id: [...(old?.booked_classes_id || []), classId],
       }))
@@ -35,11 +41,11 @@ export default function ClassCard({
       return { prev }
     },
     onError: (err, vars, context) => {
-      queryClient.setQueryData(["booked-classes-id", 0], context.prev)
+      queryClient.setQueryData(["booked-classes-id", userId], context.prev)
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["booked-classes-id", 0])
-      queryClient.invalidateQueries(["booked-classes", 0])
+      queryClient.invalidateQueries(["booked-classes-id", userId])
+      queryClient.invalidateQueries(["booked-classes", userId])
       queryClient.invalidateQueries(["scheduled-classes"])
     },
   })

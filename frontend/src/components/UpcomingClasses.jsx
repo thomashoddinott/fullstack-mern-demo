@@ -3,17 +3,22 @@ import "./UpcomingClasses.css"
 import UpcomingClassRow from "./UpcomingClassRow"
 import { getClassStyle } from "../constants/classStyles"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useAuth } from "../hooks/useAuth"
 import axios from "axios"
 
 export default function UpcomingClasses() {
-  // 1) fetch booked class ids for user 0
+  const { currentUser } = useAuth()
+  const userId = currentUser?.uid
+
+  // 1) fetch booked class ids for the authenticated user
   const {
     data: bookedResp,
     isLoading: isBookedLoading,
     isError: isBookedError,
   } = useQuery({
-    queryKey: ["booked-classes-id", 0],
-    queryFn: () => axios.get(`/api/users/0/booked-classes-id`).then((r) => r.data),
+    queryKey: ["booked-classes-id", userId],
+    queryFn: () => axios.get(`/api/users/${userId}/booked-classes-id`).then((r) => r.data),
+    enabled: !!userId,
   })
 
   // 2) once we have booked ids, fetch each scheduled class and map to { title, date }
@@ -22,7 +27,7 @@ export default function UpcomingClasses() {
     isLoading: isClassesLoading,
     isError: isClassesError,
   } = useQuery({
-    queryKey: ["booked-classes", 0],
+    queryKey: ["booked-classes", userId],
     queryFn: async () => {
       const ids = bookedResp?.booked_classes_id ?? []
       if (!ids || ids.length === 0) return []
@@ -33,7 +38,7 @@ export default function UpcomingClasses() {
       results.sort((a, b) => new Date(a.start) - new Date(b.start))
       return results.map((r) => ({ title: r.title, date: r.start, id: r.id }))
     },
-    enabled: Array.isArray(bookedResp?.booked_classes_id),
+    enabled: Array.isArray(bookedResp?.booked_classes_id) && !!userId,
   })
 
   const loading = isBookedLoading || isClassesLoading
@@ -43,28 +48,31 @@ export default function UpcomingClasses() {
 
   const removeMutation = useMutation({
     mutationFn: async ({ classId }) => {
-      const resp = await axios.put(`/api/users/0/booked-classes`, { action: "remove", classId })
+      const resp = await axios.put(`/api/users/${userId}/booked-classes`, {
+        action: "remove",
+        classId,
+      })
       // decrement spots_booked for the scheduled class
       await axios.put(`/api/scheduled-classes/${classId}/minus1`)
       return resp.data
     },
     // optimistic update
     onMutate: async ({ classId }) => {
-      await queryClient.cancelQueries(["booked-classes", 0])
-      await queryClient.cancelQueries(["booked-classes-id", 0])
+      await queryClient.cancelQueries(["booked-classes", userId])
+      await queryClient.cancelQueries(["booked-classes-id", userId])
 
-      const previousClasses = queryClient.getQueryData(["booked-classes", 0])
-      const previousIds = queryClient.getQueryData(["booked-classes-id", 0])
+      const previousClasses = queryClient.getQueryData(["booked-classes", userId])
+      const previousIds = queryClient.getQueryData(["booked-classes-id", userId])
 
       // optimistically remove from booked-classes list
       if (previousClasses) {
-        queryClient.setQueryData(["booked-classes", 0], (old) =>
+        queryClient.setQueryData(["booked-classes", userId], (old) =>
           (old || []).filter((c) => c.id !== classId)
         )
       }
 
       if (previousIds) {
-        queryClient.setQueryData(["booked-classes-id", 0], (old) => ({
+        queryClient.setQueryData(["booked-classes-id", userId], (old) => ({
           booked_classes_id: (old?.booked_classes_id || []).filter((i) => i !== classId),
         }))
       }
@@ -74,15 +82,15 @@ export default function UpcomingClasses() {
     onError: (_err, variables, context) => {
       // rollback
       if (context?.previousClasses) {
-        queryClient.setQueryData(["booked-classes", 0], context.previousClasses)
+        queryClient.setQueryData(["booked-classes", userId], context.previousClasses)
       }
       if (context?.previousIds) {
-        queryClient.setQueryData(["booked-classes-id", 0], context.previousIds)
+        queryClient.setQueryData(["booked-classes-id", userId], context.previousIds)
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["booked-classes", 0])
-      queryClient.invalidateQueries(["booked-classes-id", 0])
+      queryClient.invalidateQueries(["booked-classes", userId])
+      queryClient.invalidateQueries(["booked-classes-id", userId])
       queryClient.invalidateQueries(["scheduled-classes"])
     },
   })
