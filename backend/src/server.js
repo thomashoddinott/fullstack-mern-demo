@@ -5,6 +5,7 @@ import cors from "cors" // is this necessary at this stage?
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
 import Stripe from "stripe"
+import { DEFAULT_AVATAR_BASE64 } from "./defaultAvatar.js"
 
 dotenv.config({ path: "../.env" })
 
@@ -37,7 +38,8 @@ app.get("/hello", (req, res) => {
 
 app.get("/api/users/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id)
+    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
     const user = await db
       .collection("users")
@@ -70,10 +72,61 @@ app.get("/api/users/:id", async (req, res) => {
   }
 })
 
+// POST create new user
+app.post("/api/users", async (req, res) => {
+  try {
+    const { id, name, rank } = req.body
+
+    if (!id || !name || !rank) {
+      return res.status(400).json({ message: "id, name, and rank are required" })
+    }
+
+    // Check if user already exists
+    const existing = await db.collection("users").findOne({ id })
+    if (existing) {
+      return res.status(409).json({ message: "User already exists" })
+    }
+
+    // Create new user document
+    const newUser = {
+      id,
+      name,
+      rank,
+      subscription: {
+        status: "Inactive",
+        plan_id: null,
+        expiry: null,
+        start: null,
+      },
+      stats: {
+        classes_this_month: 0,
+        total_classes: 0,
+        favorite_class: null,
+      },
+      booked_classes_id: [],
+    }
+
+    await db.collection("users").insertOne(newUser)
+
+    // Create default avatar for new user
+    const defaultAvatar = {
+      userId: id,
+      avatar: DEFAULT_AVATAR_BASE64,
+    }
+    await db.collection("user-avatars").insertOne(defaultAvatar)
+
+    res.status(201).json({ message: "User created successfully", user: newUser })
+  } catch (err) {
+    console.error("Error creating user:", err)
+    res.status(500).json({ error: "Internal server error" })
+  }
+})
+
 // GET user avatar by userId
 app.get("/api/users/:id/avatar", async (req, res) => {
   try {
-    const userId = Number(req.params.id) // convert :id to a number
+    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+    const userId = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
     const userAvatar = await db.collection("user-avatars").findOne({ userId })
 
     if (!userAvatar || !userAvatar.avatar) {
@@ -101,8 +154,8 @@ app.get("/api/users/:id/avatar", async (req, res) => {
 // GET only booked_classes_id for a user
 app.get("/api/users/:id/booked-classes-id", async (req, res) => {
   try {
-    const id = Number(req.params.id)
-    if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid user id" })
+    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
     const doc = await db
       .collection("users")
@@ -122,8 +175,8 @@ app.get("/api/users/:id/booked-classes-id", async (req, res) => {
 // PUT user avatar (accepts multipart/form-data with field `avatar`)
 app.put("/api/users/:id/avatar", upload.single("avatar"), async (req, res) => {
   try {
-    const userId = Number(req.params.id)
-    if (Number.isNaN(userId)) return res.status(400).json({ message: "Invalid user id" })
+    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+    const userId = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
     if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: "No avatar file uploaded (field name: 'avatar')" })
@@ -358,8 +411,8 @@ app.put("/api/scheduled-classes/:id/:action", async (req, res) => {
 // { action: 'add', classId: 5 }      -> add single id (no duplicates)
 app.put("/api/users/:id/booked-classes", async (req, res) => {
   try {
-    const id = Number(req.params.id)
-    if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid user id" })
+    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
     const { booked_classes_id, action, classId } = req.body || {}
 
@@ -409,8 +462,8 @@ app.put("/api/users/:id/booked-classes", async (req, res) => {
 // New route: extend subscription with plan in URL (e.g. /api/users/0/extend-subscription/3m)
 app.patch("/api/users/:id/extend-subscription/:plan", async (req, res) => {
   try {
-    const id = Number(req.params.id)
-    if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid user id" })
+    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
     const plan = req.params.plan
     const allowed = { "1m": 1, "3m": 3, "12m": 12 }

@@ -1,6 +1,9 @@
 /* eslint-disable no-undef */
 describe("Contact Us E2E", () => {
   beforeEach(() => {
+    // Mock user API responses
+    cy.mockUserAPIs()
+
     // Default stub for POST /api/contact
     cy.intercept("POST", "/api/contact", (req) => {
       req.reply({ statusCode: 200, body: { success: true } })
@@ -8,7 +11,7 @@ describe("Contact Us E2E", () => {
   })
 
   it("submits Contact Us form and shows success then closes", () => {
-    cy.visit("/about")
+    cy.signIn("/about")
 
     // Open the contact form
     cy.contains("button", "Contact Us").click()
@@ -44,7 +47,7 @@ describe("Contact Us E2E", () => {
       "postContact2"
     )
 
-    cy.visit("http://localhost:5173/about")
+    cy.signIn("/about")
     cy.contains("button", "Book Trial Lesson").click()
 
     // Prefilled subject and message from AboutPage
@@ -72,7 +75,7 @@ describe("Contact Us E2E", () => {
   })
 
   it("shows client validation errors when required fields are missing", () => {
-    cy.visit("http://localhost:5173/about")
+    cy.signIn("/about")
     cy.contains("button", "Contact Us").click()
 
     // Click send without filling fields
@@ -88,7 +91,7 @@ describe("Contact Us E2E", () => {
       "postContactFail"
     )
 
-    cy.visit("http://localhost:5173/about")
+    cy.signIn("/about")
     cy.contains("button", "Contact Us").click()
 
     // Fill required fields

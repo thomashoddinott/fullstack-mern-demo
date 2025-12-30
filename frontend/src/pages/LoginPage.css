@@ -1,0 +1,37 @@
+@reference "../index.css";
+
+.login-container {
+  @apply max-w-md mx-auto mt-16 p-8 border border-gray-300 rounded-lg bg-white shadow-lg;
+}
+
+.login-container h1 {
+  @apply mb-6 text-center text-gray-800 text-2xl font-bold;
+}
+
+.login-container input {
+  @apply w-full p-3 mb-4 border border-gray-300 rounded text-base;
+}
+
+.login-container input:focus {
+  @apply outline-none border-red-600;
+}
+
+.login-container button {
+  @apply w-full p-3 bg-red-600 text-white border-none rounded text-base font-semibold cursor-pointer transition-colors;
+}
+
+.login-container button:hover {
+  @apply bg-red-700;
+}
+
+.login-container .error {
+  @apply p-3 mb-4 bg-red-50 text-red-700 border border-red-200 rounded text-sm;
+}
+
+.login-container .create-account-link {
+  @apply block mt-4 text-center text-red-600 no-underline text-sm;
+}
+
+.login-container .create-account-link:hover {
+  @apply underline;
+}
