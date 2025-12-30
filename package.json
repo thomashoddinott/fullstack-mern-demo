@@ -23,6 +23,7 @@
     "@vitest/ui": "^4.0.15",
     "concurrently": "^9.2.1",
     "cypress": "^15.7.1",
+    "firebase": "^12.7.0",
     "husky": "^9.0.0",
     "jsdom": "^27.3.0",
     "lint-staged": "^15.2.0",

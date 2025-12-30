@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 describe("Subscription renewal", () => {
+  const TEST_USER_ID = "TwIjD4UmW4UJo4d8Vgg0CYR7HCy2"
+
   it("clicking Pay now initiates Stripe checkout with correct data", () => {
     // Prepare initial user data: subscription expiry 10 days from now
     const now = new Date()
@@ -7,8 +9,8 @@ describe("Subscription renewal", () => {
     const initialExpiry = new Date(now.getTime() + 10 * msPerDay).toISOString()
 
     const user = {
-      id: 0,
-      name: "Test User",
+      id: TEST_USER_ID,
+      name: "John Firebase",
       subscription: {
         plan_id: "1m",
         expiry: initialExpiry,
@@ -26,7 +28,16 @@ describe("Subscription renewal", () => {
     const plans = [plan]
 
     // Intercept the user GET
-    cy.intercept("GET", "/api/users/0", { statusCode: 200, body: user }).as("getUser")
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}`, { statusCode: 200, body: user }).as(
+      "getUser"
+    )
+
+    // Intercept avatar
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}/avatar`, {
+      statusCode: 200,
+      headers: { "content-type": "image/jpeg" },
+      body: "",
+    }).as("getAvatar")
 
     // Intercept the plans endpoint
     cy.intercept("GET", "/api/plans", { statusCode: 200, body: plans }).as("getPlans")
@@ -40,15 +51,15 @@ describe("Subscription renewal", () => {
       expect(req.body.plan.id).to.equal("1m")
       expect(req.body.plan.name).to.equal("1 month")
       expect(req.body.plan.price).to.equal(99)
-      expect(req.body.userId).to.equal(0)
+      expect(req.body.userId).to.equal(TEST_USER_ID)
 
       // Don't actually respond - this will prevent the redirect
       // Just let it hang so we can verify the request was made
       req.reply({ forceNetworkError: true })
     }).as("createCheckout")
 
-    // Visit the subscriptions page
-    cy.visit("/subscriptions")
+    // Sign in and visit the subscriptions page
+    cy.signIn("/subscriptions")
 
     // Wait for initial data load
     cy.wait("@getUser")
@@ -64,7 +75,7 @@ describe("Subscription renewal", () => {
     cy.wait("@createCheckout").then((interception) => {
       // Additional verification
       expect(interception.request.body.plan.id).to.equal("1m")
-      expect(interception.request.body.userId).to.equal(0)
+      expect(interception.request.body.userId).to.equal(TEST_USER_ID)
     })
   })
 
@@ -75,8 +86,8 @@ describe("Subscription renewal", () => {
     const initialExpiry = new Date(now.getTime() + 10 * msPerDay).toISOString()
 
     const user = {
-      id: 0,
-      name: "Test User",
+      id: TEST_USER_ID,
+      name: "John Firebase",
       subscription: {
         plan_id: "1m",
         expiry: initialExpiry,
@@ -92,9 +103,16 @@ describe("Subscription renewal", () => {
     }
 
     // Intercept the user GET - return current user state
-    cy.intercept("GET", "/api/users/0", (req) => {
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}`, (req) => {
       req.reply({ statusCode: 200, body: currentUser })
     }).as("getUser")
+
+    // Intercept avatar
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}/avatar`, {
+      statusCode: 200,
+      headers: { "content-type": "image/jpeg" },
+      body: "",
+    }).as("getAvatar")
 
     // Intercept the plans endpoint
     cy.intercept("GET", "/api/plans", { statusCode: 200, body: [plan] }).as("getPlans")
@@ -103,7 +121,7 @@ describe("Subscription renewal", () => {
     cy.intercept("GET", "/api/plans/*", { statusCode: 200, body: plan }).as("getPlan")
 
     // Mock the subscription extension endpoint (called by webhook)
-    cy.intercept("PATCH", "/api/users/0/extend-subscription/*", (req) => {
+    cy.intercept("PATCH", `/api/users/${TEST_USER_ID}/extend-subscription/*`, (req) => {
       const newExpiry = new Date(
         new Date(currentUser.subscription.expiry).getTime() + 31 * msPerDay
       ).toISOString()
@@ -114,8 +132,8 @@ describe("Subscription renewal", () => {
       req.reply({ statusCode: 200, body: updatedUser })
     }).as("extendSubscription")
 
-    // Visit the subscriptions page
-    cy.visit("/subscriptions")
+    // Sign in and visit the subscriptions page
+    cy.signIn("/subscriptions")
 
     // Wait for initial data load
     cy.wait("@getUser")
@@ -164,8 +182,8 @@ describe("Subscription renewal", () => {
     const expiredDate = new Date(now.getTime() - 5 * msPerDay).toISOString() // 5 days ago
 
     const user = {
-      id: 0,
-      name: "Test User",
+      id: TEST_USER_ID,
+      name: "John Firebase",
       rank: "Blue Belt",
       subscription: {
         plan_id: "1m",
@@ -188,16 +206,22 @@ describe("Subscription renewal", () => {
     }
 
     // Intercept the user GET - return current user state
-    cy.intercept("GET", "/api/users/0", (req) => {
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}`, (req) => {
       req.reply({ statusCode: 200, body: currentUser })
     }).as("getUser")
 
     // Intercept the avatar endpoint (return empty blob)
-    cy.intercept("GET", "/api/users/0/avatar", {
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}/avatar`, {
       statusCode: 200,
       headers: { "content-type": "image/jpeg" },
       body: "",
     }).as("getAvatar")
+
+    // Intercept booked classes
+    cy.intercept("GET", `/api/users/${TEST_USER_ID}/booked-classes-id`, {
+      statusCode: 200,
+      body: [],
+    }).as("getBookedClasses")
 
     // Intercept the plans endpoint
     cy.intercept("GET", "/api/plans", { statusCode: 200, body: [plan] }).as("getPlans")
@@ -219,7 +243,7 @@ describe("Subscription renewal", () => {
     }).as("createCheckout")
 
     // Step 1: Begin on homepage with inactive user
-    cy.visit("/")
+    cy.signIn("/")
 
     // Wait for initial data load
     cy.wait("@getUser")
