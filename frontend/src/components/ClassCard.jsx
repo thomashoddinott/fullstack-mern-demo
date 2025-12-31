@@ -3,6 +3,7 @@ import { getClassStyle } from "../constants/classStyles"
 import { useAuth } from "../hooks/useAuth"
 import axios from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { getAuthToken } from "../utils/api"
 
 export default function ClassCard({
   id,
@@ -21,12 +22,21 @@ export default function ClassCard({
 
   const addBookingMutation = useMutation({
     mutationFn: async (classId) => {
-      const resp = await axios.put(`/api/users/${userId}/booked-classes`, {
-        action: "add",
-        classId,
-      })
+      const token = await getAuthToken()
+      const resp = await axios.put(
+        `/api/users/${userId}/booked-classes`,
+        {
+          action: "add",
+          classId,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
       // increment spots_booked on the scheduled class
-      await axios.put(`/api/scheduled-classes/${classId}/plus1`)
+      await axios.put(`/api/scheduled-classes/${classId}/plus1`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       return resp.data
     },
     onMutate: async (classId) => {

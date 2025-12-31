@@ -33,12 +33,17 @@ const MONGO_URI = "mongodb://localhost:27017"
 const client = new MongoClient(MONGO_URI)
 
 let db
+
 async function connectDB() {
-  await client.connect()
-  db = client.db("bjj_academy")
-  console.log("Connected to MongoDB")
+  try {
+    await client.connect()
+    db = client.db("bjj_academy")
+    console.log("✓ Connected to MongoDB")
+  } catch (error) {
+    console.error("✗ Failed to connect to MongoDB:", error)
+    process.exit(1) // Exit if we can't connect to database
+  }
 }
-connectDB()
 
 // --- AUTHENTICATION MIDDLEWARE ---
 
@@ -674,6 +679,13 @@ app.get("/api/checkout/session", verifyFirebaseToken, async (req, res) => {
   }
 })
 
-app.listen(8000, () => {
-  console.log("Server is listening on port 8000")
-})
+// Start server only after MongoDB is connected
+async function startServer() {
+  await connectDB()
+
+  app.listen(8000, () => {
+    console.log("✓ Server is listening on port 8000")
+  })
+}
+
+startServer()

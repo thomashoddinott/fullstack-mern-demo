@@ -4,6 +4,7 @@ import ClassCard from "../ClassCard"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../hooks/useAuth"
 import axios from "axios"
+import { getAuthToken } from "../../utils/api"
 
 export function formatClassTime(start, end) {
   const startDate = new Date(start)
@@ -41,7 +42,14 @@ export default function BookClasses() {
   // fetch the user's booked class ids so we can disable booking for already-booked classes
   const { data: bookedResp } = useQuery({
     queryKey: ["booked-classes-id", userId],
-    queryFn: () => axios.get(`/api/users/${userId}/booked-classes-id`).then((r) => r.data),
+    queryFn: async () => {
+      const token = await getAuthToken()
+      return axios
+        .get(`/api/users/${userId}/booked-classes-id`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((r) => r.data)
+    },
     enabled: !!userId,
     staleTime: 1000 * 60 * 1,
   })
@@ -50,7 +58,14 @@ export default function BookClasses() {
   // fetch the current user so we can check subscription status and block booking when Inactive
   const { data: user } = useQuery({
     queryKey: ["user", userId],
-    queryFn: () => axios.get(`/api/users/${userId}`).then((r) => r.data),
+    queryFn: async () => {
+      const token = await getAuthToken()
+      return axios
+        .get(`/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((r) => r.data)
+    },
     enabled: !!userId,
     staleTime: 1000 * 60 * 1,
   })
