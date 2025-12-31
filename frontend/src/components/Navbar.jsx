@@ -4,6 +4,7 @@ import { getAuth, signOut } from "firebase/auth"
 import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../hooks/useAuth"
+import { getAuthToken } from "../utils/api"
 import "./Navbar.css"
 
 export default function Navbar() {
@@ -13,17 +14,29 @@ export default function Navbar() {
 
   const { data: user } = useQuery({
     queryKey: ["user", currentUser?.uid],
-    queryFn: () => axios.get(`/api/users/${currentUser?.uid}`).then((res) => res.data),
+    queryFn: async () => {
+      const token = await getAuthToken()
+      return axios
+        .get(`/api/users/${currentUser?.uid}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => res.data)
+    },
     enabled: !!currentUser?.uid,
     staleTime: 1000 * 60 * 1,
   })
 
   const { data: avatarUrl } = useQuery({
     queryKey: ["avatar", currentUser?.uid],
-    queryFn: () =>
-      axios
-        .get(`/api/users/${currentUser?.uid}/avatar`, { responseType: "blob" })
-        .then((res) => URL.createObjectURL(res.data)),
+    queryFn: async () => {
+      const token = await getAuthToken()
+      return axios
+        .get(`/api/users/${currentUser?.uid}/avatar`, {
+          responseType: "blob",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => URL.createObjectURL(res.data))
+    },
     enabled: !!currentUser?.uid,
     staleTime: 1000 * 60 * 5,
   })
