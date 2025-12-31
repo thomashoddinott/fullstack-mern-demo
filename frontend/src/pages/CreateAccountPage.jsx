@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
+import confetti from "canvas-confetti"
 import "./CreateAccountPage.css"
 
 export default function CreateAccountPage() {
@@ -46,7 +47,17 @@ export default function CreateAccountPage() {
         throw new Error("Failed to create user profile")
       }
 
-      navigate("/")
+      // Trigger confetti celebration
+      confetti({
+        particleCount: 300,
+        spread: 100,
+        origin: { y: 0.6 },
+      })
+
+      // Wait 3 seconds for confetti animation before navigating
+      setTimeout(() => {
+        navigate("/")
+      }, 3000)
     } catch (e) {
       setError("Error creating account: " + e.message)
     }
