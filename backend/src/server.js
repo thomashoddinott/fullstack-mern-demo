@@ -123,7 +123,7 @@ app.get("/hello", (req, res) => {
   res.send("Hello!")
 })
 
-app.get("/api/users/:id", async (req, res) => {
+app.get("/api/users/:id", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
     const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
@@ -160,12 +160,17 @@ app.get("/api/users/:id", async (req, res) => {
 })
 
 // POST create new user
-app.post("/api/users", async (req, res) => {
+app.post("/api/users", verifyFirebaseToken, async (req, res) => {
   try {
     const { id, name, rank } = req.body
 
     if (!id || !name || !rank) {
       return res.status(400).json({ message: "id, name, and rank are required" })
+    }
+
+    // Verify that the authenticated user is creating their own account
+    if (req.user.uid !== id) {
+      return res.status(403).json({ message: "You can only create an account for yourself" })
     }
 
     // Check if user already exists
@@ -210,7 +215,7 @@ app.post("/api/users", async (req, res) => {
 })
 
 // GET user avatar by userId
-app.get("/api/users/:id/avatar", async (req, res) => {
+app.get("/api/users/:id/avatar", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
     const userId = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
@@ -239,7 +244,7 @@ app.get("/api/users/:id/avatar", async (req, res) => {
 })
 
 // GET only booked_classes_id for a user
-app.get("/api/users/:id/booked-classes-id", async (req, res) => {
+app.get("/api/users/:id/booked-classes-id", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
     const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
@@ -260,7 +265,7 @@ app.get("/api/users/:id/booked-classes-id", async (req, res) => {
 })
 
 // PUT user avatar (accepts multipart/form-data with field `avatar`)
-app.put("/api/users/:id/avatar", upload.single("avatar"), async (req, res) => {
+app.put("/api/users/:id/avatar", verifyFirebaseToken, requireOwnership, upload.single("avatar"), async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
     const userId = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
@@ -441,7 +446,7 @@ app.get("/api/scheduled-classes/:id", async (req, res) => {
 })
 
 // PUT update spots_booked for scheduled class (plus1 or minus1)
-app.put("/api/scheduled-classes/:id/:action", async (req, res) => {
+app.put("/api/scheduled-classes/:id/:action", verifyFirebaseToken, async (req, res) => {
   try {
     const id = Number(req.params.id)
     if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid class id" })
@@ -496,7 +501,7 @@ app.put("/api/scheduled-classes/:id/:action", async (req, res) => {
 // { booked_classes_id: [1,2,3] }    -> replace the array
 // { action: 'remove', classId: 5 }   -> remove single id
 // { action: 'add', classId: 5 }      -> add single id (no duplicates)
-app.put("/api/users/:id/booked-classes", async (req, res) => {
+app.put("/api/users/:id/booked-classes", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
     const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
@@ -547,7 +552,7 @@ app.put("/api/users/:id/booked-classes", async (req, res) => {
 })
 
 // New route: extend subscription with plan in URL (e.g. /api/users/0/extend-subscription/3m)
-app.patch("/api/users/:id/extend-subscription/:plan", async (req, res) => {
+app.patch("/api/users/:id/extend-subscription/:plan", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
     const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
@@ -610,12 +615,17 @@ app.patch("/api/users/:id/extend-subscription/:plan", async (req, res) => {
 })
 
 // Stripe checkout endpoint
-app.post("/api/checkout", async (req, res) => {
+app.post("/api/checkout", verifyFirebaseToken, async (req, res) => {
   try {
     const { plan, userId } = req.body
 
     if (!plan || !plan.name || !plan.price) {
       return res.status(400).json({ error: "Invalid plan data" })
+    }
+
+    // Verify user can only checkout for themselves
+    if (req.user.uid !== userId) {
+      return res.status(403).json({ error: "You can only create checkout sessions for yourself" })
     }
 
     const line_items = [
@@ -645,7 +655,7 @@ app.post("/api/checkout", async (req, res) => {
 })
 
 // Retrieve checkout session and return payment status
-app.get("/api/checkout/session", async (req, res) => {
+app.get("/api/checkout/session", verifyFirebaseToken, async (req, res) => {
   try {
     const { session_id } = req.query
 
