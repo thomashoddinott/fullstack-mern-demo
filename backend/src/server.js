@@ -40,6 +40,82 @@ async function connectDB() {
 }
 connectDB()
 
+// --- AUTHENTICATION MIDDLEWARE ---
+
+// Verify Firebase ID token from Authorization header
+async function verifyFirebaseToken(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Authentication required. Please provide a valid Firebase ID token.",
+      })
+    }
+
+    const idToken = authHeader.split("Bearer ")[1]
+
+    // Verify the token with Firebase Admin SDK
+    const decodedToken = await admin.auth().verifyIdToken(idToken)
+
+    // Attach user info to request object
+    req.user = {
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+    }
+
+    next()
+  } catch (error) {
+    console.error("Token verification error:", error.message)
+
+    if (error.code === "auth/id-token-expired") {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Your session has expired. Please log in again.",
+      })
+    }
+
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "Invalid authentication token.",
+    })
+  }
+}
+
+// Require authentication (simple wrapper)
+function requireAuth(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "Authentication required.",
+    })
+  }
+  next()
+}
+
+// Require ownership of resource (user can only access their own data)
+function requireOwnership(req, res, next) {
+  const resourceId = req.params.id
+
+  // For backward compatibility, allow numeric IDs to pass through
+  // (these are legacy users before Firebase migration)
+  if (!isNaN(resourceId)) {
+    console.warn(`Legacy numeric ID detected: ${resourceId}. Skipping ownership check.`)
+    return next()
+  }
+
+  // Check if the authenticated user owns this resource
+  if (req.user.uid !== resourceId) {
+    return res.status(403).json({
+      error: "Forbidden",
+      message: "You don't have permission to access this resource.",
+    })
+  }
+
+  next()
+}
+
 // --- ROUTES ---
 
 // simple test
