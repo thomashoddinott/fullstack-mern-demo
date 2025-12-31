@@ -5,9 +5,20 @@ import cors from "cors" // is this necessary at this stage?
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
 import Stripe from "stripe"
+import admin from "firebase-admin"
+import { createRequire } from "module"
 import { DEFAULT_AVATAR_BASE64 } from "./defaultAvatar.js"
 
 dotenv.config({ path: "../.env" })
+
+// Initialize Firebase Admin SDK
+// Using createRequire to import JSON in ES modules
+const require = createRequire(import.meta.url)
+const serviceAccount = require("../firebase-credentials.json")
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+})
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
