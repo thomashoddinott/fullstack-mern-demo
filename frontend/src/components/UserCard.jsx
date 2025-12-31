@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react"
 import axios from "axios"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../hooks/useAuth"
+import { getAuthToken } from "../utils/api"
 import "./UserCard.css"
 
 export default function UserCard() {
@@ -14,7 +15,14 @@ export default function UserCard() {
     isError: isUserError,
   } = useQuery({
     queryKey: ["user", currentUser?.uid],
-    queryFn: () => axios.get(`/api/users/${currentUser?.uid}`).then((res) => res.data),
+    queryFn: async () => {
+      const token = await getAuthToken()
+      return axios
+        .get(`/api/users/${currentUser?.uid}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => res.data)
+    },
     enabled: !!currentUser?.uid,
   })
 
@@ -25,10 +33,15 @@ export default function UserCard() {
     isError: isAvatarError,
   } = useQuery({
     queryKey: ["avatar", currentUser?.uid],
-    queryFn: () =>
-      axios
-        .get(`/api/users/${currentUser?.uid}/avatar`, { responseType: "blob" })
-        .then((res) => URL.createObjectURL(res.data)),
+    queryFn: async () => {
+      const token = await getAuthToken()
+      return axios
+        .get(`/api/users/${currentUser?.uid}/avatar`, {
+          responseType: "blob",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => URL.createObjectURL(res.data))
+    },
     enabled: !!user && !!currentUser?.uid, // only fetch avatar once user exists
   })
 
@@ -46,11 +59,15 @@ export default function UserCard() {
   const [isUploading, setIsUploading] = useState(false)
 
   const uploadMutation = useMutation({
-    mutationFn: ({ userId, file }) => {
+    mutationFn: async ({ userId, file }) => {
+      const token = await getAuthToken()
       const fd = new FormData()
       fd.append("avatar", file)
       return axios.put(`/api/users/${userId}/avatar`, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       })
     },
     onMutate: () => setIsUploading(true),

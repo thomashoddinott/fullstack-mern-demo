@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 import confetti from "canvas-confetti"
+import { authenticatedFetch } from "../utils/api"
 import "./CreateAccountPage.css"
 
 export default function CreateAccountPage() {
@@ -31,7 +32,7 @@ export default function CreateAccountPage() {
       const firebaseUid = userCredential.user.uid
 
       // Create MongoDB user record
-      const response = await fetch("http://localhost:8000/api/users", {
+      const response = await authenticatedFetch("http://localhost:8000/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

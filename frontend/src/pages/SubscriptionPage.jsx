@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import "./SubscriptionPage.css"
 import SubscriptionCard from "../components/SubscriptionCard"
 import { useAuth } from "../hooks/useAuth"
+import { getAuthToken } from "../utils/api"
 
 export default function SubscriptionPage() {
   const { currentUser } = useAuth()
@@ -20,7 +21,14 @@ export default function SubscriptionPage() {
   // Fetch user and plan via useQuery so handler can rely on cached data.
   const userQuery = useQuery({
     queryKey: ["user", currentUser?.uid],
-    queryFn: () => axios.get(`/api/users/${currentUser?.uid}`).then((r) => r.data),
+    queryFn: async () => {
+      const token = await getAuthToken()
+      return axios
+        .get(`/api/users/${currentUser?.uid}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((r) => r.data)
+    },
     enabled: !!currentUser?.uid,
     staleTime: 1000 * 60 * 1,
   })
@@ -45,14 +53,21 @@ export default function SubscriptionPage() {
       }
 
       // Create Stripe checkout session
-      const res = await axios.post("http://localhost:8000/api/checkout", {
-        plan: {
-          id: currentPlan.id,
-          name: currentPlan.label,
-          price: parseFloat(currentPlan.price.replace("$", "")),
+      const token = await getAuthToken()
+      const res = await axios.post(
+        "http://localhost:8000/api/checkout",
+        {
+          plan: {
+            id: currentPlan.id,
+            name: currentPlan.label,
+            price: parseFloat(currentPlan.price.replace("$", "")),
+          },
+          userId,
         },
-        userId,
-      })
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
 
       // Redirect to Stripe checkout
       window.location.href = res.data.url
@@ -67,14 +82,21 @@ export default function SubscriptionPage() {
       const userId = userQuery.data?.id ?? 0
 
       // Create Stripe checkout session
-      const res = await axios.post("http://localhost:8000/api/checkout", {
-        plan: {
-          id: plan.id,
-          name: plan.label,
-          price: parseFloat(plan.price.replace("$", "")),
+      const token = await getAuthToken()
+      const res = await axios.post(
+        "http://localhost:8000/api/checkout",
+        {
+          plan: {
+            id: plan.id,
+            name: plan.label,
+            price: parseFloat(plan.price.replace("$", "")),
+          },
+          userId,
         },
-        userId,
-      })
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
 
       // Redirect to Stripe checkout
       window.location.href = res.data.url
