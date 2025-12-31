@@ -66,7 +66,7 @@ export default function SubscriptionPage() {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       )
 
       // Redirect to Stripe checkout
@@ -95,7 +95,7 @@ export default function SubscriptionPage() {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       )
 
       // Redirect to Stripe checkout

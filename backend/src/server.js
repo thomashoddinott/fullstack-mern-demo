@@ -249,57 +249,68 @@ app.get("/api/users/:id/avatar", verifyFirebaseToken, requireOwnership, async (r
 })
 
 // GET only booked_classes_id for a user
-app.get("/api/users/:id/booked-classes-id", verifyFirebaseToken, requireOwnership, async (req, res) => {
-  try {
-    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
-    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
+app.get(
+  "/api/users/:id/booked-classes-id",
+  verifyFirebaseToken,
+  requireOwnership,
+  async (req, res) => {
+    try {
+      // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+      const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
-    const doc = await db
-      .collection("users")
-      .findOne({ id }, { projection: { booked_classes_id: 1, _id: 0 } })
+      const doc = await db
+        .collection("users")
+        .findOne({ id }, { projection: { booked_classes_id: 1, _id: 0 } })
 
-    if (!doc) return res.status(404).json({ message: "User not found" })
+      if (!doc) return res.status(404).json({ message: "User not found" })
 
-    // If the field doesn't exist, return an empty array for convenience
-    const booked = doc.booked_classes_id ?? []
-    res.json({ booked_classes_id: booked })
-  } catch (err) {
-    console.error("Error fetching booked_classes_id:", err)
-    res.status(500).json({ error: "Internal server error" })
+      // If the field doesn't exist, return an empty array for convenience
+      const booked = doc.booked_classes_id ?? []
+      res.json({ booked_classes_id: booked })
+    } catch (err) {
+      console.error("Error fetching booked_classes_id:", err)
+      res.status(500).json({ error: "Internal server error" })
+    }
   }
-})
+)
 
 // PUT user avatar (accepts multipart/form-data with field `avatar`)
-app.put("/api/users/:id/avatar", verifyFirebaseToken, requireOwnership, upload.single("avatar"), async (req, res) => {
-  try {
-    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
-    const userId = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
+app.put(
+  "/api/users/:id/avatar",
+  verifyFirebaseToken,
+  requireOwnership,
+  upload.single("avatar"),
+  async (req, res) => {
+    try {
+      // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+      const userId = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
-    if (!req.file || !req.file.buffer) {
-      return res.status(400).json({ message: "No avatar file uploaded (field name: 'avatar')" })
+      if (!req.file || !req.file.buffer) {
+        return res.status(400).json({ message: "No avatar file uploaded (field name: 'avatar')" })
+      }
+
+      const mime = req.file.mimetype || "image/jpeg"
+      const buffer = req.file.buffer
+
+      // Store both a data-URI string (for easy retrieval) and binary data (for tools/users that want raw bytes)
+      const base64 = buffer.toString("base64")
+      const dataUri = `data:${mime};base64,${base64}`
+
+      await db
+        .collection("user-avatars")
+        .updateOne(
+          { userId },
+          { $set: { userId, avatar: dataUri, data: new Binary(buffer) } },
+          { upsert: true }
+        )
+
+      res.json({ message: "Avatar updated", userId })
+    } catch (err) {
+      console.error("Error updating user avatar:", err)
+      res.status(500).json({ error: "Internal server error" })
     }
-
-    const mime = req.file.mimetype || "image/jpeg"
-    const buffer = req.file.buffer
-
-    // Store both a data-URI string (for easy retrieval) and binary data (for tools/users that want raw bytes)
-    const base64 = buffer.toString("base64")
-    const dataUri = `data:${mime};base64,${base64}`
-
-    await db
-      .collection("user-avatars")
-      .updateOne(
-        { userId },
-        { $set: { userId, avatar: dataUri, data: new Binary(buffer) } },
-        { upsert: true }
-      )
-
-    res.json({ message: "Avatar updated", userId })
-  } catch (err) {
-    console.error("Error updating user avatar:", err)
-    res.status(500).json({ error: "Internal server error" })
   }
-})
+)
 
 // GET all plans
 app.get("/api/plans", async (req, res) => {
@@ -506,118 +517,128 @@ app.put("/api/scheduled-classes/:id/:action", verifyFirebaseToken, async (req, r
 // { booked_classes_id: [1,2,3] }    -> replace the array
 // { action: 'remove', classId: 5 }   -> remove single id
 // { action: 'add', classId: 5 }      -> add single id (no duplicates)
-app.put("/api/users/:id/booked-classes", verifyFirebaseToken, requireOwnership, async (req, res) => {
-  try {
-    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
-    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
+app.put(
+  "/api/users/:id/booked-classes",
+  verifyFirebaseToken,
+  requireOwnership,
+  async (req, res) => {
+    try {
+      // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+      const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
-    const { booked_classes_id, action, classId } = req.body || {}
+      const { booked_classes_id, action, classId } = req.body || {}
 
-    const coll = db.collection("users")
+      const coll = db.collection("users")
 
-    // Ensure user exists
-    const user = await coll.findOne({ id })
-    if (!user) return res.status(404).json({ message: "User not found" })
+      // Ensure user exists
+      const user = await coll.findOne({ id })
+      if (!user) return res.status(404).json({ message: "User not found" })
 
-    // Use the stored subscription status on the user object rather than recalculating
-    const isInactive = user.subscription?.status === "Inactive"
+      // Use the stored subscription status on the user object rather than recalculating
+      const isInactive = user.subscription?.status === "Inactive"
 
-    if (Array.isArray(booked_classes_id)) {
-      // If this replacement introduces any new class ids compared to existing booked list,
-      // treat that as booking activity and block it when the user's subscription is inactive.
-      const existing = user.booked_classes_id ?? []
-      const additions = booked_classes_id.filter((cid) => !existing.includes(cid))
-      if (additions.length > 0 && isInactive) {
-        return res.status(403).json({ message: "Cannot book classes - subscription inactive" })
+      if (Array.isArray(booked_classes_id)) {
+        // If this replacement introduces any new class ids compared to existing booked list,
+        // treat that as booking activity and block it when the user's subscription is inactive.
+        const existing = user.booked_classes_id ?? []
+        const additions = booked_classes_id.filter((cid) => !existing.includes(cid))
+        if (additions.length > 0 && isInactive) {
+          return res.status(403).json({ message: "Cannot book classes - subscription inactive" })
+        }
+
+        // Replace the array
+        await coll.updateOne({ id }, { $set: { booked_classes_id } })
+      } else if (action === "remove" && typeof classId !== "undefined") {
+        await coll.updateOne({ id }, { $pull: { booked_classes_id: classId } })
+      } else if (action === "add" && typeof classId !== "undefined") {
+        // Block explicit add attempts when subscription is inactive
+        if (isInactive) {
+          return res.status(403).json({ message: "Cannot book classes - subscription inactive" })
+        }
+
+        await coll.updateOne({ id }, { $addToSet: { booked_classes_id: classId } })
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Invalid body. Provide booked_classes_id array or action + classId." })
       }
 
-      // Replace the array
-      await coll.updateOne({ id }, { $set: { booked_classes_id } })
-    } else if (action === "remove" && typeof classId !== "undefined") {
-      await coll.updateOne({ id }, { $pull: { booked_classes_id: classId } })
-    } else if (action === "add" && typeof classId !== "undefined") {
-      // Block explicit add attempts when subscription is inactive
-      if (isInactive) {
-        return res.status(403).json({ message: "Cannot book classes - subscription inactive" })
-      }
-
-      await coll.updateOne({ id }, { $addToSet: { booked_classes_id: classId } })
-    } else {
-      return res
-        .status(400)
-        .json({ message: "Invalid body. Provide booked_classes_id array or action + classId." })
+      const updated = await coll.findOne({ id }, { projection: { booked_classes_id: 1, _id: 0 } })
+      return res.json({ booked_classes_id: updated.booked_classes_id ?? [] })
+    } catch (err) {
+      console.error("Error updating booked_classes_id:", err)
+      res.status(500).json({ error: "Internal server error" })
     }
-
-    const updated = await coll.findOne({ id }, { projection: { booked_classes_id: 1, _id: 0 } })
-    return res.json({ booked_classes_id: updated.booked_classes_id ?? [] })
-  } catch (err) {
-    console.error("Error updating booked_classes_id:", err)
-    res.status(500).json({ error: "Internal server error" })
   }
-})
+)
 
 // New route: extend subscription with plan in URL (e.g. /api/users/0/extend-subscription/3m)
-app.patch("/api/users/:id/extend-subscription/:plan", verifyFirebaseToken, requireOwnership, async (req, res) => {
-  try {
-    // Support both numeric IDs (legacy) and Firebase UIDs (strings)
-    const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
+app.patch(
+  "/api/users/:id/extend-subscription/:plan",
+  verifyFirebaseToken,
+  requireOwnership,
+  async (req, res) => {
+    try {
+      // Support both numeric IDs (legacy) and Firebase UIDs (strings)
+      const id = isNaN(req.params.id) ? req.params.id : Number(req.params.id)
 
-    const plan = req.params.plan
-    const allowed = { "1m": 1, "3m": 3, "12m": 12 }
-    if (!plan || !Object.prototype.hasOwnProperty.call(allowed, plan)) {
-      return res.status(400).json({ message: "Invalid plan. Allowed: 1m, 3m, 12m" })
-    }
-
-    const months = allowed[plan]
-    const daysToAdd = 31 * months // use as approximation
-
-    const coll = db.collection("users")
-    const user = await coll.findOne({ id })
-    if (!user) return res.status(404).json({ message: "User not found" })
-
-    // Compute parsed expiry (if present) and now
-    const now = new Date()
-    let parsedExpiry = null
-    if (user.subscription && user.subscription.expiry) {
-      const p = new Date(user.subscription.expiry)
-      if (!Number.isNaN(p.getTime())) parsedExpiry = p
-    }
-
-    // Determine whether the subscription is inactive. Prefer an explicit stored status
-    // when available; otherwise fall back to expiry comparison (missing expiry => inactive).
-    let isInactive = user.subscription?.status === "Inactive"
-    if (!isInactive) {
-      if (parsedExpiry) {
-        isInactive = parsedExpiry.getTime() < now.getTime()
-      } else {
-        isInactive = true
+      const plan = req.params.plan
+      const allowed = { "1m": 1, "3m": 3, "12m": 12 }
+      if (!plan || !Object.prototype.hasOwnProperty.call(allowed, plan)) {
+        return res.status(400).json({ message: "Invalid plan. Allowed: 1m, 3m, 12m" })
       }
+
+      const months = allowed[plan]
+      const daysToAdd = 31 * months // use as approximation
+
+      const coll = db.collection("users")
+      const user = await coll.findOne({ id })
+      if (!user) return res.status(404).json({ message: "User not found" })
+
+      // Compute parsed expiry (if present) and now
+      const now = new Date()
+      let parsedExpiry = null
+      if (user.subscription && user.subscription.expiry) {
+        const p = new Date(user.subscription.expiry)
+        if (!Number.isNaN(p.getTime())) parsedExpiry = p
+      }
+
+      // Determine whether the subscription is inactive. Prefer an explicit stored status
+      // when available; otherwise fall back to expiry comparison (missing expiry => inactive).
+      let isInactive = user.subscription?.status === "Inactive"
+      if (!isInactive) {
+        if (parsedExpiry) {
+          isInactive = parsedExpiry.getTime() < now.getTime()
+        } else {
+          isInactive = true
+        }
+      }
+
+      // If the subscription is inactive, start from `now`; otherwise extend from the parsed expiry.
+      const baseExpiry = isInactive ? now : (parsedExpiry ?? now)
+      const newExpiry = new Date(baseExpiry.getTime() + daysToAdd * 24 * 60 * 60 * 1000)
+
+      // Prepare update fields; if the subscription was inactive, reset the start date to today
+      const updateFields = {
+        "subscription.expiry": newExpiry.toISOString(),
+        "subscription.plan_id": plan,
+      }
+      if (isInactive) {
+        updateFields["subscription.start"] = now.toISOString()
+      }
+      updateFields["subscription.status"] = "Active"
+
+      // Update the user's subscription fields
+      await coll.updateOne({ id }, { $set: updateFields })
+
+      const updated = await coll.findOne({ id }, { projection: { subscription: 1, _id: 0 } })
+      return res.json({ subscription: updated.subscription })
+    } catch (err) {
+      console.error("Error extending subscription expiry:", err)
+      return res.status(500).json({ error: "Internal server error" })
     }
-
-    // If the subscription is inactive, start from `now`; otherwise extend from the parsed expiry.
-    const baseExpiry = isInactive ? now : (parsedExpiry ?? now)
-    const newExpiry = new Date(baseExpiry.getTime() + daysToAdd * 24 * 60 * 60 * 1000)
-
-    // Prepare update fields; if the subscription was inactive, reset the start date to today
-    const updateFields = {
-      "subscription.expiry": newExpiry.toISOString(),
-      "subscription.plan_id": plan,
-    }
-    if (isInactive) {
-      updateFields["subscription.start"] = now.toISOString()
-    }
-    updateFields["subscription.status"] = "Active"
-
-    // Update the user's subscription fields
-    await coll.updateOne({ id }, { $set: updateFields })
-
-    const updated = await coll.findOne({ id }, { projection: { subscription: 1, _id: 0 } })
-    return res.json({ subscription: updated.subscription })
-  } catch (err) {
-    console.error("Error extending subscription expiry:", err)
-    return res.status(500).json({ error: "Internal server error" })
   }
-})
+)
 
 // Stripe checkout endpoint
 app.post("/api/checkout", verifyFirebaseToken, async (req, res) => {

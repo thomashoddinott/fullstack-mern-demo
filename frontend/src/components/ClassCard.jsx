@@ -31,7 +31,7 @@ export default function ClassCard({
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       )
       // increment spots_booked on the scheduled class
       await axios.put(`/api/scheduled-classes/${classId}/plus1`, null, {

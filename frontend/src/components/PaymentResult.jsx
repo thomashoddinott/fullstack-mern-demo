@@ -35,9 +35,13 @@ const PaymentResult = () => {
         // If payment was successful, extend the user's subscription (only once)
         if (res.data.paid && plan && userId && !hasExtended.current) {
           hasExtended.current = true
-          await axios.patch(`http://localhost:8000/api/users/${userId}/extend-subscription/${plan}`, null, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
+          await axios.patch(
+            `http://localhost:8000/api/users/${userId}/extend-subscription/${plan}`,
+            null,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
         }
       } catch (err) {
         console.error(err)
