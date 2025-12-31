@@ -12,7 +12,8 @@
       "Bash(mv:*)",
       "Bash(npm install:*)",
       "Bash(npx cypress verify)",
-      "Bash(npm run lint:frontend:*)"
+      "Bash(npm run lint:frontend:*)",
+      "Bash(npx prettier --write frontend/src/pages/CreateAccountPage.jsx)"
     ]
   }
 }
