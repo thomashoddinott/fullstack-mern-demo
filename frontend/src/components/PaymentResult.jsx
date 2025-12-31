@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router"
+import { getAuthToken } from "../utils/api"
 
 const PaymentResult = () => {
   const [loading, setLoading] = useState(true)
@@ -23,8 +24,10 @@ const PaymentResult = () => {
 
     const fetchStatus = async () => {
       try {
+        const token = await getAuthToken()
         const res = await axios.get("http://localhost:8000/api/checkout/session", {
           params: { session_id },
+          headers: { Authorization: `Bearer ${token}` },
         })
 
         setPaid(!!res.data.paid)
@@ -32,7 +35,9 @@ const PaymentResult = () => {
         // If payment was successful, extend the user's subscription (only once)
         if (res.data.paid && plan && userId && !hasExtended.current) {
           hasExtended.current = true
-          await axios.patch(`http://localhost:8000/api/users/${userId}/extend-subscription/${plan}`)
+          await axios.patch(`http://localhost:8000/api/users/${userId}/extend-subscription/${plan}`, null, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
         }
       } catch (err) {
         console.error(err)
