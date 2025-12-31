@@ -19,6 +19,11 @@ import axios from "axios"
 // Mock axios
 vi.mock("axios")
 
+// Mock authentication utilities
+vi.mock("../utils/api", () => ({
+  getAuthToken: vi.fn().mockResolvedValue("mock-firebase-token"),
+}))
+
 // Mock useNavigate
 const mockNavigate = vi.fn()
 vi.mock("react-router", async () => {
@@ -53,6 +58,7 @@ describe("PaymentResult URL Parameter Parsing", () => {
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith("http://localhost:8000/api/checkout/session", {
         params: { session_id: "cs_test_123" },
+        headers: { Authorization: "Bearer mock-firebase-token" },
       })
     })
   })
@@ -71,7 +77,11 @@ describe("PaymentResult URL Parameter Parsing", () => {
 
     await waitFor(() => {
       expect(axios.patch).toHaveBeenCalledWith(
-        "http://localhost:8000/api/users/5/extend-subscription/2"
+        "http://localhost:8000/api/users/5/extend-subscription/2",
+        null,
+        {
+          headers: { Authorization: "Bearer mock-firebase-token" },
+        }
       )
     })
   })
@@ -153,7 +163,11 @@ describe("PaymentResult Subscription Extension Logic", () => {
 
     await waitFor(() => {
       expect(axios.patch).toHaveBeenCalledWith(
-        "http://localhost:8000/api/users/0/extend-subscription/1"
+        "http://localhost:8000/api/users/0/extend-subscription/1",
+        null,
+        {
+          headers: { Authorization: "Bearer mock-firebase-token" },
+        }
       )
     })
   })
