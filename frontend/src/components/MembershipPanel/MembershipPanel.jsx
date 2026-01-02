@@ -1,7 +1,7 @@
 import "./MembershipPanel.css"
-import SubscriptionCard from "./SubscriptionCard"
+import SubscriptionCard from "../SubscriptionCard/SubscriptionCard"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "../hooks/useAuth"
+import { useAuth } from "../../hooks/useAuth"
 
 export default function MembershipPanel() {
   const navigate = useNavigate()

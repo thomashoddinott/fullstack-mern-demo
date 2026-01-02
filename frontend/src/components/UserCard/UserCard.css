@@ -1,4 +1,4 @@
-@reference "../index.css"; /* adjust path if needed */
+@reference "../../index.css"; /* adjust path if needed */
 
 /* Container */
 .user-card {

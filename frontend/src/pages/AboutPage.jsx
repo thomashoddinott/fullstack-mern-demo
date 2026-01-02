@@ -1,6 +1,6 @@
 // -- Add this at the top of the file --
 import { useState } from "react"
-import ContactForm from "../components/ContactForm"
+import ContactForm from "../components/ContactForm/ContactForm"
 import "./AboutPage.css"
 
 export default function AboutPage() {

@@ -3,8 +3,8 @@ import { useState, useEffect } from "react"
 import { getAuth, signOut } from "firebase/auth"
 import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
-import { useAuth } from "../hooks/useAuth"
-import { getAuthToken } from "../utils/api"
+import { useAuth } from "../../hooks/useAuth"
+import { getAuthToken } from "../../utils/api"
 import "./Navbar.css"
 
 export default function Navbar() {

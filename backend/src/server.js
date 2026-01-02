@@ -8,8 +8,12 @@ import Stripe from "stripe"
 import admin from "firebase-admin"
 import { createRequire } from "module"
 import { DEFAULT_AVATAR_BASE64 } from "./defaultAvatar.js"
+import { fileURLToPath } from "url"
+import { dirname, join } from "path"
 
-dotenv.config({ path: "../.env" })
+// Load .env from project root (2 levels up from this file)
+const __dirname = dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: join(__dirname, "../../.env") })
 
 // Initialize Firebase Admin SDK
 // Using createRequire to import JSON in ES modules
@@ -121,13 +125,19 @@ function requireOwnership(req, res, next) {
   next()
 }
 
+// --- HELPER FUNCTIONS ---
+
+// Converts dollar amount to cents for Stripe
+export function convertDollarsToCents(price) {
+  return price * 100
+}
+
+// Validates plan has required fields
+export function isValidPlan(plan) {
+  return !(!plan || !plan.name || !plan.price)
+}
+
 // --- ROUTES ---
-
-// simple test
-app.get("/hello", (req, res) => {
-  res.send("Hello!")
-})
-
 app.get("/api/users/:id", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
@@ -645,7 +655,7 @@ app.post("/api/checkout", verifyFirebaseToken, async (req, res) => {
   try {
     const { plan, userId } = req.body
 
-    if (!plan || !plan.name || !plan.price) {
+    if (!isValidPlan(plan)) {
       return res.status(400).json({ error: "Invalid plan data" })
     }
 
@@ -659,7 +669,7 @@ app.post("/api/checkout", verifyFirebaseToken, async (req, res) => {
         price_data: {
           currency: "usd",
           product_data: { name: plan.name },
-          unit_amount: plan.price * 100,
+          unit_amount: convertDollarsToCents(plan.price),
         },
         quantity: 1,
       },
@@ -709,4 +719,10 @@ async function startServer() {
   })
 }
 
-startServer()
+// Export app and connectDB for testing
+export { app, connectDB }
+
+// Only start server if not imported (i.e., running directly)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  startServer()
+}

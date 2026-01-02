@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react"
 import axios from "axios"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useAuth } from "../hooks/useAuth"
-import { getAuthToken } from "../utils/api"
+import { useAuth } from "../../hooks/useAuth"
+import { getAuthToken } from "../../utils/api"
 import "./UserCard.css"
 
 export default function UserCard() {

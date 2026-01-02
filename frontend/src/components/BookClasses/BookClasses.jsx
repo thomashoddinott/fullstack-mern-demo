@@ -1,6 +1,6 @@
 import "./BookClasses.css"
 import { useNavigate } from "react-router-dom"
-import ClassCard from "../ClassCard"
+import ClassCard from "../ClassCard/ClassCard"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../hooks/useAuth"
 import axios from "axios"

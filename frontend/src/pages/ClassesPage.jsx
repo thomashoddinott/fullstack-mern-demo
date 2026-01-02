@@ -1,5 +1,5 @@
 import { useState } from "react"
-import TeacherModal from "../components/TeacherModal"
+import TeacherModal from "../components/TeacherModal/TeacherModal"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 
