@@ -1,9 +1,8 @@
 import "./UpcomingClasses.css"
-import "./UpcomingClasses.css"
-import UpcomingClassRow from "./UpcomingClassRow"
-import { getClassStyle } from "../constants/classStyles"
+import UpcomingClassRow from "../UpcomingClassRow/UpcomingClassRow"
+import { getClassStyle } from "../../constants/classStyles"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useAuth } from "../hooks/useAuth"
+import { useAuth } from "../../hooks/useAuth"
 import axios from "axios"
 
 export default function UpcomingClasses() {

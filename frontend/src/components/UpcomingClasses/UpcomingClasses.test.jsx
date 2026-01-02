@@ -10,7 +10,7 @@ vi.mock("axios")
 
 // Mock useAuth hook
 const mockCurrentUser = { uid: "test-user-123" }
-vi.mock("../hooks/useAuth", () => ({
+vi.mock("../../hooks/useAuth", () => ({
   useAuth: vi.fn(() => ({ currentUser: mockCurrentUser })),
 }))
 

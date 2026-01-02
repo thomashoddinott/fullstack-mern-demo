@@ -2,7 +2,7 @@ import React from "react"
 import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
 import "./SubscriptionPage.css"
-import SubscriptionCard from "../components/SubscriptionCard"
+import SubscriptionCard from "../components/SubscriptionCard/SubscriptionCard"
 import { useAuth } from "../hooks/useAuth"
 import { getAuthToken } from "../utils/api"
 

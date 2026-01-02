@@ -9,7 +9,7 @@ import axios from "axios"
 vi.mock("axios")
 
 // Mock authentication utilities
-vi.mock("../utils/api", () => ({
+vi.mock("../../utils/api", () => ({
   getAuthToken: vi.fn().mockResolvedValue("mock-firebase-token"),
 }))
 
