@@ -193,4 +193,36 @@ describe("GET /api/scheduled-classes", () => {
     },
     10000
   )
+
+  it(
+    "should return a single scheduled class by ID",
+    async () => {
+      const classId = 9
+      const response = await request(app).get(`/api/scheduled-classes/${classId}`).expect(200)
+
+      // Response should be an object
+      expect(response.body).toBeTypeOf("object")
+      expect(Array.isArray(response.body)).toBe(false)
+
+      // Should have expected structure
+      expect(response.body).toHaveProperty("id", classId)
+      expect(response.body).toHaveProperty("title")
+      expect(response.body).toHaveProperty("teacher")
+      expect(response.body).toHaveProperty("start")
+      expect(response.body).toHaveProperty("end")
+      expect(response.body).toHaveProperty("spots_booked")
+      expect(response.body).toHaveProperty("spots_total")
+    },
+    10000
+  )
+
+  it(
+    "should return 404 for non-existent scheduled class ID",
+    async () => {
+      const response = await request(app).get("/api/scheduled-classes/99999").expect(404)
+
+      expect(response.body).toHaveProperty("message", "Scheduled class not found")
+    },
+    10000
+  )
 })
