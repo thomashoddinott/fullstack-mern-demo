@@ -126,12 +126,6 @@ function requireOwnership(req, res, next) {
 }
 
 // --- ROUTES ---
-
-// simple test
-app.get("/hello", (req, res) => {
-  res.send("Hello!")
-})
-
 app.get("/api/users/:id", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
     // Support both numeric IDs (legacy) and Firebase UIDs (strings)
