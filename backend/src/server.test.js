@@ -45,6 +45,34 @@ describe("GET /api/plans", () => {
     },
     10000
   ) // 10 second timeout
+
+  it(
+    "should return a single plan by ID",
+    async () => {
+      const planId = "1m"
+      const response = await request(app).get(`/api/plans/${planId}`).expect(200)
+
+      // Response should be an object
+      expect(response.body).toBeTypeOf("object")
+      expect(Array.isArray(response.body)).toBe(false)
+
+      // Should have expected structure
+      expect(response.body).toHaveProperty("id", planId)
+      expect(response.body).toHaveProperty("label")
+      expect(response.body).toHaveProperty("price")
+    },
+    10000
+  )
+
+  it(
+    "should return 404 for non-existent plan ID",
+    async () => {
+      const response = await request(app).get("/api/plans/invalid-id").expect(404)
+
+      expect(response.body).toHaveProperty("message", "Plan not found")
+    },
+    10000
+  )
 })
 
 describe("GET /api/classes", () => {
