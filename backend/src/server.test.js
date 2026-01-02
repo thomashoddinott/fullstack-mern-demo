@@ -46,3 +46,26 @@ describe("GET /api/plans", () => {
     10000
   ) // 10 second timeout
 })
+
+describe("GET /api/classes", () => {
+  it(
+    "should return all class types",
+    async () => {
+      const response = await request(app).get("/api/classes").expect(200)
+
+      // Response should be an array
+      expect(Array.isArray(response.body)).toBe(true)
+
+      // Should have at least one class
+      expect(response.body.length).toBeGreaterThan(0)
+
+      // First class should have expected structure
+      const classType = response.body[0]
+      expect(classType).toHaveProperty("name")
+      expect(classType).toHaveProperty("description")
+      expect(classType).toHaveProperty("teacherIds")
+      expect(Array.isArray(classType.teacherIds)).toBe(true)
+    },
+    10000
+  )
+})
