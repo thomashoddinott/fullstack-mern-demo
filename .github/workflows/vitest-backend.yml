@@ -1,4 +1,4 @@
-name: CI - Vitest Unit Tests
+name: CI - Backend Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  vitest:
+  vitest-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,15 +23,10 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
-      - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm ci
-
       - name: Install backend dependencies
         run: |
           cd backend
           npm ci
 
-      - name: Run Vitest tests
-        run: npm test -- --run
+      - name: Run backend tests
+        run: npm test -- --run backend/
