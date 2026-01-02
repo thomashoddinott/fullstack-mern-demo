@@ -121,6 +121,37 @@ describe("GET /api/teachers", () => {
     },
     10000
   )
+
+  it(
+    "should return a single teacher by ID",
+    async () => {
+      const teacherId = 0
+      const response = await request(app).get(`/api/teachers/${teacherId}`).expect(200)
+
+      // Response should be an object
+      expect(response.body).toBeTypeOf("object")
+      expect(Array.isArray(response.body)).toBe(false)
+
+      // Should have expected structure
+      expect(response.body).toHaveProperty("id", teacherId)
+      expect(response.body).toHaveProperty("firstName")
+      expect(response.body).toHaveProperty("lastName")
+      expect(response.body).toHaveProperty("avatar")
+      expect(response.body).toHaveProperty("bio")
+      expect(response.body).toHaveProperty("quirkyFact")
+    },
+    10000
+  )
+
+  it(
+    "should return 404 for non-existent teacher ID",
+    async () => {
+      const response = await request(app).get("/api/teachers/9999").expect(404)
+
+      expect(response.body).toHaveProperty("message", "Teacher not found")
+    },
+    10000
+  )
 })
 
 describe("GET /api/scheduled-classes", () => {
