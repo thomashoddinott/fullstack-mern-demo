@@ -154,6 +154,47 @@ describe("GET /api/teachers", () => {
   )
 })
 
+describe("POST /api/contact", () => {
+  it(
+    "should return 400 when name is missing",
+    async () => {
+      const response = await request(app)
+        .post("/api/contact")
+        .send({ email: "test@example.com", message: "Hello" })
+        .expect(400)
+
+      expect(response.body).toHaveProperty("error", "All fields are required")
+    },
+    10000
+  )
+
+  it(
+    "should return 400 when email is missing",
+    async () => {
+      const response = await request(app)
+        .post("/api/contact")
+        .send({ name: "John Doe", message: "Hello" })
+        .expect(400)
+
+      expect(response.body).toHaveProperty("error", "All fields are required")
+    },
+    10000
+  )
+
+  it(
+    "should return 400 when message is missing",
+    async () => {
+      const response = await request(app)
+        .post("/api/contact")
+        .send({ name: "John Doe", email: "test@example.com" })
+        .expect(400)
+
+      expect(response.body).toHaveProperty("error", "All fields are required")
+    },
+    10000
+  )
+})
+
 describe("GET /api/scheduled-classes", () => {
   it(
     "should return all scheduled classes sorted by start time",
