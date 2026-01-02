@@ -1,4 +1,4 @@
-@reference "../index.css";
+@reference "../../index.css";
 
 .class-card {
   @apply bg-white rounded-xl shadow-sm overflow-hidden w-58 hover:-translate-y-1 transition-transform cursor-pointer;

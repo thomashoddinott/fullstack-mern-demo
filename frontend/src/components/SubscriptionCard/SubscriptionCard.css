@@ -1,4 +1,4 @@
-@reference "../index.css";
+@reference "../../index.css";
 
 .subscription-card-ui {
   @apply rounded-xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center shadow-sm;

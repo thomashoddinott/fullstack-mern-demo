@@ -1,7 +1,7 @@
-import UserCard from "../components/UserCard"
-import MembershipPanel from "../components/MembershipPanel"
+import UserCard from "../components/UserCard/UserCard"
+import MembershipPanel from "../components/MembershipPanel/MembershipPanel"
 import BookClasses from "../components/BookClasses/BookClasses"
-import UpcomingClasses from "../components/UpcomingClasses"
+import UpcomingClasses from "../components/UpcomingClasses/UpcomingClasses"
 
 export default function HomePage() {
   return (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router"
-import { getAuthToken } from "../utils/api"
+import { getAuthToken } from "../../utils/api"
 
 const PaymentResult = () => {
   const [loading, setLoading] = useState(true)

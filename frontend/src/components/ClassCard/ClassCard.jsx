@@ -1,9 +1,9 @@
 import "./ClassCard.css"
-import { getClassStyle } from "../constants/classStyles"
-import { useAuth } from "../hooks/useAuth"
+import { getClassStyle } from "../../constants/classStyles"
+import { useAuth } from "../../hooks/useAuth"
 import axios from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { getAuthToken } from "../utils/api"
+import { getAuthToken } from "../../utils/api"
 
 export default function ClassCard({
   id,

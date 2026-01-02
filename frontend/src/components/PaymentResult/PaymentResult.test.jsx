@@ -1,0 +1,180 @@
+/* eslint-disable no-undef */
+import { describe, it, expect, beforeEach } from "vitest"
+import { render, screen, waitFor } from "@testing-library/react"
+import { BrowserRouter } from "react-router"
+import PaymentResult from "./PaymentResult"
+import axios from "axios"
+
+// Mock axios
+vi.mock("axios")
+
+// Mock authentication utilities
+vi.mock("../../utils/api", () => ({
+  getAuthToken: vi.fn().mockResolvedValue("mock-firebase-token"),
+}))
+
+// Mock useNavigate
+const mockNavigate = vi.fn()
+vi.mock("react-router", async () => {
+  const actual = await vi.importActual("react-router")
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
+
+describe("PaymentResult - Critical Payment Logic", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("extends subscription when payment is successful", async () => {
+    axios.get.mockResolvedValue({ data: { paid: true } })
+    axios.patch.mockResolvedValue({ data: {} })
+
+    delete window.location
+    window.location = {
+      search: "?session_id=cs_test_123&plan=1&userId=0",
+    }
+
+    render(
+      <BrowserRouter>
+        <PaymentResult />
+      </BrowserRouter>
+    )
+
+    // Should verify payment with Stripe
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith("http://localhost:8000/api/checkout/session", {
+        params: { session_id: "cs_test_123" },
+        headers: { Authorization: "Bearer mock-firebase-token" },
+      })
+    })
+
+    // Should extend subscription after successful payment
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(
+        "http://localhost:8000/api/users/0/extend-subscription/1",
+        null,
+        {
+          headers: { Authorization: "Bearer mock-firebase-token" },
+        }
+      )
+    })
+  })
+
+  it("does NOT extend subscription when payment failed", async () => {
+    axios.get.mockResolvedValue({ data: { paid: false } })
+
+    delete window.location
+    window.location = {
+      search: "?session_id=cs_test_123&plan=1&userId=0",
+    }
+
+    render(
+      <BrowserRouter>
+        <PaymentResult />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+
+    // Critical: Should NOT extend subscription when payment failed
+    expect(axios.patch).not.toHaveBeenCalled()
+  })
+
+  it("does NOT extend subscription when plan parameter is missing", async () => {
+    axios.get.mockResolvedValue({ data: { paid: true } })
+
+    delete window.location
+    window.location = {
+      search: "?session_id=cs_test_123&userId=0",
+    }
+
+    render(
+      <BrowserRouter>
+        <PaymentResult />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+
+    // Critical: Missing plan should prevent silent subscription extension
+    expect(axios.patch).not.toHaveBeenCalled()
+  })
+
+  it("does NOT extend subscription when userId parameter is missing", async () => {
+    axios.get.mockResolvedValue({ data: { paid: true } })
+
+    delete window.location
+    window.location = {
+      search: "?session_id=cs_test_123&plan=1",
+    }
+
+    render(
+      <BrowserRouter>
+        <PaymentResult />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+
+    // Critical: Missing userId should prevent silent subscription extension
+    expect(axios.patch).not.toHaveBeenCalled()
+  })
+
+  it("shows error when session_id is missing", async () => {
+    delete window.location
+    window.location = {
+      search: "?plan=1&userId=0",
+    }
+
+    render(
+      <BrowserRouter>
+        <PaymentResult />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("No session_id found in URL")).toBeInTheDocument()
+    })
+
+    // Should NOT call payment verification API when session_id is missing
+    expect(axios.get).not.toHaveBeenCalled()
+  })
+
+  it("handles API errors gracefully", async () => {
+    axios.get.mockRejectedValue(new Error("Network error"))
+
+    delete window.location
+    window.location = {
+      search: "?session_id=cs_test_123&plan=1&userId=0",
+    }
+
+    render(
+      <BrowserRouter>
+        <PaymentResult />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Could not verify payment status")).toBeInTheDocument()
+    })
+  })
+})
+
+// Note: The useRef(false) guard in PaymentResult prevents calling extend-subscription twice
+// within the same component instance. This protects against React's useEffect running multiple
+// times during development (StrictMode) or if the effect dependencies change. Testing this
+// behavior directly in a unit test is complex because:
+// 1. Re-rendering creates a new component instance with a new ref
+// 2. The useEffect has empty dependencies so it only runs once per mount
+// 3. The guard is primarily for React internal behavior, not user-triggered re-renders
+//
+// The guard is verified by code review and manual testing in development mode.

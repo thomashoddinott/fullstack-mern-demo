@@ -5,10 +5,10 @@ import ClassesPage from "./pages/ClassesPage"
 import SubscriptionPage from "./pages/SubscriptionPage"
 import SchedulePage from "./pages/SchedulePage"
 import AboutPage from "./pages/AboutPage"
-import PaymentResult from "./components/PaymentResult"
+import PaymentResult from "./components/PaymentResult/PaymentResult"
 import LoginPage from "./pages/LoginPage"
 import CreateAccountPage from "./pages/CreateAccountPage"
-import ProtectedRoute from "./components/ProtectedRoute"
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"
 
 const routes = [
   {
