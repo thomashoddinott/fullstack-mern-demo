@@ -125,6 +125,18 @@ function requireOwnership(req, res, next) {
   next()
 }
 
+// --- HELPER FUNCTIONS ---
+
+// Converts dollar amount to cents for Stripe
+export function convertDollarsToCents(price) {
+  return price * 100
+}
+
+// Validates plan has required fields
+export function isValidPlan(plan) {
+  return !(!plan || !plan.name || !plan.price)
+}
+
 // --- ROUTES ---
 app.get("/api/users/:id", verifyFirebaseToken, requireOwnership, async (req, res) => {
   try {
@@ -643,7 +655,7 @@ app.post("/api/checkout", verifyFirebaseToken, async (req, res) => {
   try {
     const { plan, userId } = req.body
 
-    if (!plan || !plan.name || !plan.price) {
+    if (!isValidPlan(plan)) {
       return res.status(400).json({ error: "Invalid plan data" })
     }
 
@@ -657,7 +669,7 @@ app.post("/api/checkout", verifyFirebaseToken, async (req, res) => {
         price_data: {
           currency: "usd",
           product_data: { name: plan.name },
-          unit_amount: plan.price * 100,
+          unit_amount: convertDollarsToCents(plan.price),
         },
         quantity: 1,
       },

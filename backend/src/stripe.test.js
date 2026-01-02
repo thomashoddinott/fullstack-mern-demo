@@ -1,23 +1,13 @@
 import { describe, it, expect } from "vitest"
+import { convertDollarsToCents, isValidPlan } from "./server.js"
 
 /**
- * Tests for Stripe-related logic in server.js
+ * Unit tests for Stripe-related helper functions from server.js
  *
- * These tests focus on pure functions extracted from the /api/checkout endpoint:
+ * These tests focus on pure functions used in the /api/checkout endpoint:
  * - Price conversion (dollars to cents)
  * - Plan validation
  */
-
-// Helper function extracted from server.js line 486
-// Converts dollar amount to cents for Stripe
-function convertDollarsToCents(price) {
-  return price * 100
-}
-
-// Helper function for plan validation (server.js lines 477-479)
-function isValidPlan(plan) {
-  return !(!plan || !plan.name || !plan.price)
-}
 
 describe("Stripe Price Calculation", () => {
   it("converts integer dollar amounts to cents", () => {
