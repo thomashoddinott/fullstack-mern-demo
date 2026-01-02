@@ -8,8 +8,12 @@ import Stripe from "stripe"
 import admin from "firebase-admin"
 import { createRequire } from "module"
 import { DEFAULT_AVATAR_BASE64 } from "./defaultAvatar.js"
+import { fileURLToPath } from "url"
+import { dirname, join } from "path"
 
-dotenv.config({ path: "../.env" })
+// Load .env from project root (2 levels up from this file)
+const __dirname = dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: join(__dirname, "../../.env") })
 
 // Initialize Firebase Admin SDK
 // Using createRequire to import JSON in ES modules
@@ -709,4 +713,10 @@ async function startServer() {
   })
 }
 
-startServer()
+// Export app and connectDB for testing
+export { app, connectDB }
+
+// Only start server if not imported (i.e., running directly)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  startServer()
+}
