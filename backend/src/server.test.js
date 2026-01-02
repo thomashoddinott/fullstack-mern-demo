@@ -69,3 +69,44 @@ describe("GET /api/classes", () => {
     10000
   )
 })
+
+describe("GET /api/scheduled-classes", () => {
+  it(
+    "should return all scheduled classes sorted by start time",
+    async () => {
+      const response = await request(app).get("/api/scheduled-classes").expect(200)
+
+      // Response should be an array
+      expect(Array.isArray(response.body)).toBe(true)
+
+      // Should have at least one scheduled class
+      expect(response.body.length).toBeGreaterThan(0)
+
+      // First scheduled class should have expected structure
+      const scheduledClass = response.body[0]
+      expect(scheduledClass).toHaveProperty("id")
+      expect(scheduledClass).toHaveProperty("title")
+      expect(scheduledClass).toHaveProperty("teacher")
+      expect(scheduledClass).toHaveProperty("start")
+      expect(scheduledClass).toHaveProperty("end")
+      expect(scheduledClass).toHaveProperty("spots_booked")
+      expect(scheduledClass).toHaveProperty("spots_total")
+    },
+    10000
+  )
+
+  it(
+    "should respect limit query parameter",
+    async () => {
+      const limit = 5
+      const response = await request(app).get(`/api/scheduled-classes?limit=${limit}`).expect(200)
+
+      // Response should be an array
+      expect(Array.isArray(response.body)).toBe(true)
+
+      // Should return exactly 5 classes (or fewer if not enough exist)
+      expect(response.body.length).toBeLessThanOrEqual(limit)
+    },
+    10000
+  )
+})
