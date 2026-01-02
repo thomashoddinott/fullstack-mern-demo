@@ -98,6 +98,31 @@ describe("GET /api/classes", () => {
   )
 })
 
+describe("GET /api/teachers", () => {
+  it(
+    "should return all teachers",
+    async () => {
+      const response = await request(app).get("/api/teachers").expect(200)
+
+      // Response should be an array
+      expect(Array.isArray(response.body)).toBe(true)
+
+      // Should have at least one teacher
+      expect(response.body.length).toBeGreaterThan(0)
+
+      // First teacher should have expected structure
+      const teacher = response.body[0]
+      expect(teacher).toHaveProperty("id")
+      expect(teacher).toHaveProperty("firstName")
+      expect(teacher).toHaveProperty("lastName")
+      expect(teacher).toHaveProperty("avatar")
+      expect(teacher).toHaveProperty("bio")
+      expect(teacher).toHaveProperty("quirkyFact")
+    },
+    10000
+  )
+})
+
 describe("GET /api/scheduled-classes", () => {
   it(
     "should return all scheduled classes sorted by start time",
