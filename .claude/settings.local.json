@@ -13,7 +13,8 @@
       "Bash(npm install:*)",
       "Bash(npx cypress verify)",
       "Bash(npm run lint:frontend:*)",
-      "Bash(npx prettier --write frontend/src/pages/CreateAccountPage.jsx)"
+      "Bash(npx prettier --write frontend/src/pages/CreateAccountPage.jsx)",
+      "Bash(docker exec:*)"
     ]
   }
 }
