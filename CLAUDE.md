@@ -208,11 +208,18 @@ npm run cypress:run -- --spec "cypress/e2e/contact.spec.cy.js"  # Run specific t
 ## Testing Strategy
 
 - **Unit tests:** Vitest (configured at root level) + React Testing Library for frontend tests
-  - Currently minimal coverage - see [frontend/src/components/BookClasses/formatClassTime.test.js](frontend/src/components/BookClasses/formatClassTime.test.js)
+  - Currently minimal coverage - see [frontend/src/components/BookClasses/BookClasses.test.jsx](frontend/src/components/BookClasses/BookClasses.test.jsx)
   - Vitest is configured to test both `frontend/**/*.test.js` and `backend/**/*.test.js` files
   - Test configuration: [vitest.config.js](vitest.config.js)
 - **E2E tests:** Cypress (only contact form currently)
 - **No backend tests** currently exist, but Vitest is now configured to support them
+
+**Testing Principles:**
+
+- Test business logic that could silently break
+- Skip tests for things that would be obvious when broken
+- Prefer fewer, higher-value tests over comprehensive coverage
+- Use E2E tests for "does the UI work" questions
 
 ## Environment Variables
 
